@@ -113,7 +113,7 @@ export default function Home() {
 
       {/* 히어로 */}
       <section className="relative overflow-hidden h-[600px] md:h-[700px]">
-        <Image src="/images/main.jpg" alt="장위365경희한의원" fill className="object-cover object-center" priority />
+        <Image src="/images/main2.jpg" alt="장위365경희한의원" fill className="object-cover object-center" priority />
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 via-gray-900/60 to-transparent" />
         <div className="relative h-full flex items-center px-6">
           <div className="max-w-6xl mx-auto w-full">
