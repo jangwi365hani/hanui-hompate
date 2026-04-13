@@ -43,7 +43,7 @@ export default async function EventsPage() {
                   <img
                     src={event.imageUrl}
                     alt={event.title}
-                    className="w-full object-cover max-h-72"
+                    className="w-full h-auto"
                   />
                 )}
                 <div className="p-6">
