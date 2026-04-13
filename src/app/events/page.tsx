@@ -43,7 +43,7 @@ export default async function EventsPage() {
                   <img
                     src={event.imageUrl}
                     alt={event.title}
-                    className="max-h-52 w-auto mx-auto block"
+                    className="max-h-[400px] w-auto mx-auto block"
                   />
                 )}
                 <div className="p-6">
