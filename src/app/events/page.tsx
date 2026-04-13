@@ -37,13 +37,13 @@ export default async function EventsPage() {
             {events.map((event) => (
               <div
                 key={event.id}
-                className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100"
+                className="bg-white rounded-2xl shadow-sm border border-gray-100"
               >
                 {event.imageUrl && (
                   <img
                     src={event.imageUrl}
                     alt={event.title}
-                    className="w-full h-auto"
+                    className="w-full h-auto block rounded-t-2xl"
                   />
                 )}
                 <div className="p-6">
