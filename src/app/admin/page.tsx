@@ -51,8 +51,19 @@ export default function AdminPage() {
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     if (saved) {
-      setPw(saved);
-      setAuthed(true);
+      // 저장된 비밀번호 서버 검증
+      fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: saved }),
+      }).then((res) => {
+        if (res.ok) {
+          setPw(saved);
+          setAuthed(true);
+        } else {
+          sessionStorage.removeItem(STORAGE_KEY);
+        }
+      });
     }
   }, []);
 
@@ -63,11 +74,25 @@ export default function AdminPage() {
     }
   }, [authed]);
 
-  const login = () => {
-    setPw(pwInput);
-    sessionStorage.setItem(STORAGE_KEY, pwInput);
-    setAuthed(true);
-    setPwError("");
+  const login = async () => {
+    if (!pwInput) return;
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pwInput }),
+      });
+      if (res.ok) {
+        setPw(pwInput);
+        sessionStorage.setItem(STORAGE_KEY, pwInput);
+        setAuthed(true);
+        setPwError("");
+      } else {
+        setPwError("비밀번호가 틀렸습니다.");
+      }
+    } catch {
+      setPwError("서버 연결에 실패했습니다.");
+    }
   };
 
   const logout = () => {
@@ -223,6 +248,9 @@ export default function AdminPage() {
           >
             로그인
           </button>
+          <p className="text-xs text-gray-400 mt-4 text-center">
+            Vercel 환경변수 미설정 시 기본 비밀번호: <span className="font-mono">admin1234</span>
+          </p>
         </div>
       </div>
     );
