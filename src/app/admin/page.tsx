@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Edit2, Eye, EyeOff, Save, LogOut, Bell, BellOff, Upload } from "lucide-react";
+import { upload } from "@vercel/blob/client";
 
 interface Event {
   id: string;
@@ -94,16 +95,12 @@ export default function AdminPage() {
   };
 
   const uploadImage = async (file: File, adminPw: string): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      headers: { "x-admin-password": adminPw },
-      body: formData,
+    const blob = await upload(file.name, file, {
+      access: "public",
+      handleUploadUrl: "/api/upload",
+      clientPayload: JSON.stringify({ password: adminPw }),
     });
-    if (!res.ok) throw new Error("업로드 실패");
-    const data = await res.json();
-    return data.url;
+    return blob.url;
   };
 
   const handleImagePick = async (
