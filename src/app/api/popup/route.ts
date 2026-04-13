@@ -1,7 +1,7 @@
-import { put, list } from "@vercel/blob";
+import { put, list, del } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
-const POPUP_KEY = "hanui-popup.json";
+const POPUP_PREFIX = "hanui-popup";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1234";
 
 export interface Popup {
@@ -24,9 +24,12 @@ const defaultPopup: Popup = {
 
 async function getPopup(): Promise<Popup> {
   try {
-    const { blobs } = await list({ prefix: POPUP_KEY });
+    const { blobs } = await list({ prefix: POPUP_PREFIX });
     if (blobs.length === 0) return defaultPopup;
-    const res = await fetch(blobs[0].url + "?t=" + Date.now());
+    const latest = blobs.sort(
+      (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+    )[0];
+    const res = await fetch(latest.url, { cache: "no-store" });
     return await res.json();
   } catch {
     return defaultPopup;
@@ -35,7 +38,9 @@ async function getPopup(): Promise<Popup> {
 
 export async function GET() {
   const popup = await getPopup();
-  return NextResponse.json(popup);
+  return NextResponse.json(popup, {
+    headers: { "Cache-Control": "no-store" },
+  });
 }
 
 export async function PUT(req: Request) {
@@ -49,10 +54,15 @@ export async function PUT(req: Request) {
   const current = await getPopup();
   const updated: Popup = { ...current, ...popupData };
 
-  await put(POPUP_KEY, JSON.stringify(updated), {
+  // 이전 blob 삭제 후 새로 저장
+  const { blobs } = await list({ prefix: POPUP_PREFIX });
+  if (blobs.length > 0) {
+    await del(blobs.map((b) => b.url));
+  }
+  await put(`${POPUP_PREFIX}.json`, JSON.stringify(updated), {
     access: "public",
-    addRandomSuffix: false,
     contentType: "application/json",
+    cacheControlMaxAge: 0,
   });
 
   return NextResponse.json(updated);

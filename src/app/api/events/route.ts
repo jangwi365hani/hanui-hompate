@@ -1,7 +1,7 @@
 import { put, list, del } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
-const EVENTS_KEY = "hanui-events.json";
+const EVENTS_PREFIX = "hanui-events";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1234";
 
 export interface Event {
@@ -16,9 +16,13 @@ export interface Event {
 
 async function getEvents(): Promise<Event[]> {
   try {
-    const { blobs } = await list({ prefix: EVENTS_KEY });
+    const { blobs } = await list({ prefix: EVENTS_PREFIX });
     if (blobs.length === 0) return [];
-    const res = await fetch(blobs[0].url + "?t=" + Date.now());
+    // 가장 최근 blob 선택
+    const latest = blobs.sort(
+      (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+    )[0];
+    const res = await fetch(latest.url, { cache: "no-store" });
     return await res.json();
   } catch {
     return [];
@@ -26,16 +30,24 @@ async function getEvents(): Promise<Event[]> {
 }
 
 async function saveEvents(events: Event[]) {
-  await put(EVENTS_KEY, JSON.stringify(events), {
+  // 이전 blob 모두 삭제
+  const { blobs } = await list({ prefix: EVENTS_PREFIX });
+  if (blobs.length > 0) {
+    await del(blobs.map((b) => b.url));
+  }
+  // 새 blob 생성 (랜덤 suffix → 항상 새 URL)
+  await put(`${EVENTS_PREFIX}.json`, JSON.stringify(events), {
     access: "public",
-    addRandomSuffix: false,
     contentType: "application/json",
+    cacheControlMaxAge: 0,
   });
 }
 
 export async function GET() {
   const events = await getEvents();
-  return NextResponse.json(events);
+  return NextResponse.json(events, {
+    headers: { "Cache-Control": "no-store" },
+  });
 }
 
 export async function POST(req: Request) {
