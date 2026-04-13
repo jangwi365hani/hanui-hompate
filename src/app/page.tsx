@@ -6,6 +6,7 @@ import {
   Phone, MapPin, Train, Bus, ParkingCircle, Clock, ChevronRight,
   Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X
 } from "lucide-react";
+import PopupBanner from "@/components/PopupBanner";
 
 const NAV_LINKS = [
   { label: "한의원 소개", href: "#about" },
@@ -13,6 +14,7 @@ const NAV_LINKS = [
   { label: "진료과목", href: "#services" },
   { label: "진료안내", href: "#info" },
   { label: "오시는 길", href: "#location" },
+  { label: "이벤트", href: "/events" },
 ];
 
 const STATS = [
@@ -65,6 +67,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" }}>
+
+      <PopupBanner />
 
       {/* 헤더 */}
       <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
