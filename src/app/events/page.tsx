@@ -2,32 +2,11 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-
-interface Event {
-  id: string;
-  title: string;
-  content: string;
-  imageUrl: string;
-  linkUrl: string;
-  isActive: boolean;
-  createdAt: string;
-}
-
-async function getEvents(): Promise<Event[]> {
-  try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
-    const res = await fetch(`${baseUrl}/api/events`, { cache: "no-store" });
-    const data = await res.json();
-    return data.filter((e: Event) => e.isActive);
-  } catch {
-    return [];
-  }
-}
+import { getEvents } from "@/lib/data";
 
 export default async function EventsPage() {
-  const events = await getEvents();
+  const allEvents = await getEvents();
+  const events = allEvents.filter((e) => e.isActive);
 
   return (
     <div className="min-h-screen bg-gray-50">
