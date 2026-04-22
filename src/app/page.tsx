@@ -29,6 +29,7 @@ const DOCTORS = [
   { file: "doctora", name: "안익균", title: "원장",    slug: "ahn",  tags: ["통증 치료", "비염"] },
   { file: "doctorp", name: "박종성", title: "원장",    slug: "park", tags: ["종합적 치료", "한약·추나"] },
   { file: "doctors", name: "신지훈", title: "원장",    slug: "shin", tags: ["스포츠 손상", "재활"] },
+  { file: "doctorm", name: "김경민", title: "원장",    slug: "kimm", tags: ["소통 중심 진료", "맞춤 치료"] },
 ];
 
 const SERVICES = [
@@ -123,7 +124,7 @@ export default function Home() {
           <div className="max-w-6xl mx-auto w-full">
             <div className="max-w-xl">
               <span className="inline-block bg-[#8B1A2B]/80 text-white text-xs tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 font-medium backdrop-blur-sm">
-                한의사 4인 진료
+                한의사 5인 진료
               </span>
               <h2 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6 tracking-tight">
                 왜 반복되는지<br />
