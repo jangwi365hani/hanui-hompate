@@ -209,9 +209,9 @@ export default function Home() {
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             {DOCTORS.map((doc) => (
-              <Link key={doc.file} href={`/doctors/${doc.slug}`} className={`group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 hover:border-[#8B1A2B]/30 transition-all duration-300 ${doc.slug === "kimm" ? "w-[250px]" : "w-52"}`}>
-                <div className={`relative w-full bg-gray-100 ${doc.slug === "kimm" ? "h-[307px]" : "h-64"}`}>
-                  <Image src={`/images/${doc.file}.png`} alt={`${doc.name} ${doc.title}`} fill className="object-cover object-top" />
+              <Link key={doc.file} href={`/doctors/${doc.slug}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 hover:border-[#8B1A2B]/30 transition-all duration-300 w-52">
+                <div className="relative h-64 w-full bg-gray-100">
+                  <Image src={`/images/${doc.file}.png`} alt={`${doc.name} ${doc.title}`} fill className={`object-cover object-top ${doc.slug === "kimm" ? "scale-[1.2]" : ""}`} />
                 </div>
                 <div className="p-5 text-center">
                   <p className="text-xs text-[#a0293a] font-semibold mb-1">{doc.title}</p>
