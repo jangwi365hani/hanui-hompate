@@ -210,7 +210,7 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-6">
             {DOCTORS.map((doc) => (
               <Link key={doc.file} href={`/doctors/${doc.slug}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 hover:border-[#8B1A2B]/30 transition-all duration-300 w-52">
-                <div className="relative h-64 w-full bg-gray-100">
+                <div className="relative h-64 w-full bg-gray-100 overflow-hidden">
                   <Image src={`/images/${doc.file}.png`} alt={`${doc.name} ${doc.title}`} fill className={`object-cover object-top ${doc.slug === "kimm" ? "scale-[1.2]" : ""}`} />
                 </div>
                 <div className="p-5 text-center">
