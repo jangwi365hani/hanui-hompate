@@ -569,7 +569,7 @@ export default function AdminPage() {
                     onChange={(e) => {
                       const file = e.target.files?.[0];
                       if (file)
-                        handleImagePick(file, (url) => setPopup({ ...popup, imageUrl: url }));
+                        handleImagePick(file, (url) => setPopup((prev) => ({ ...prev, imageUrl: url })));
                     }}
                   />
                   <button
