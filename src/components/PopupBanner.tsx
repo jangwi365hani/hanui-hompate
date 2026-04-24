@@ -67,7 +67,7 @@ export default function PopupBanner() {
           <img
             src={popup.imageUrl}
             alt={popup.title}
-            className="w-full object-cover max-h-64"
+            className="w-full h-auto block"
           />
         )}
 
