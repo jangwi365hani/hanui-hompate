@@ -45,8 +45,6 @@ export default function AdminPage() {
   const [editingEvent, setEditingEvent] = useState<Partial<Event> | null>(null);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
-  const popupFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
@@ -137,8 +135,8 @@ export default function AdminPage() {
       const url = await uploadImage(file, pw);
       setter(url);
       showMsg("이미지 업로드 완료!");
-    } catch {
-      showMsg("이미지 업로드 실패");
+    } catch (e) {
+      showMsg(`업로드 실패: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setLoading(false);
     }
@@ -367,25 +365,21 @@ export default function AdminPage() {
                         placeholder="이미지 URL 또는 아래 업로드"
                         className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
                       />
-                      <input
-                        ref={fileRef}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file)
-                            handleImagePick(file, (url) =>
-                              setEditingEvent({ ...editingEvent, imageUrl: url })
-                            );
-                        }}
-                      />
-                      <button
-                        onClick={() => fileRef.current?.click()}
-                        className="flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-200 transition whitespace-nowrap"
-                      >
+                      <label className="flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-200 transition whitespace-nowrap cursor-pointer">
                         <Upload size={14} /> 업로드
-                      </button>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file)
+                              handleImagePick(file, (url) =>
+                                setEditingEvent((prev) => ({ ...prev, imageUrl: url }))
+                              );
+                          }}
+                        />
+                      </label>
                     </div>
                     {editingEvent.imageUrl && (
                       <img
@@ -561,23 +555,19 @@ export default function AdminPage() {
                     placeholder="이미지 URL 또는 아래 업로드"
                     className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
                   />
-                  <input
-                    ref={popupFileRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file)
-                        handleImagePick(file, (url) => setPopup((prev) => ({ ...prev, imageUrl: url })));
-                    }}
-                  />
-                  <button
-                    onClick={() => popupFileRef.current?.click()}
-                    className="flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-200 transition whitespace-nowrap"
-                  >
+                  <label className="flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-200 transition whitespace-nowrap cursor-pointer">
                     <Upload size={14} /> 업로드
-                  </button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file)
+                          handleImagePick(file, (url) => setPopup((prev) => ({ ...prev, imageUrl: url })));
+                      }}
+                    />
+                  </label>
                 </div>
                 {popup.imageUrl && (
                   <img
