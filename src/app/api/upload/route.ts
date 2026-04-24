@@ -23,6 +23,7 @@ export async function POST(request: Request): Promise<Response> {
             "image/webp",
           ],
           maximumSizeInBytes: 10 * 1024 * 1024, // 10MB
+          allowOverwrite: true,
         };
       },
       onUploadCompleted: async ({ blob }) => {
