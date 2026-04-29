@@ -38,6 +38,26 @@ export async function getEvents(): Promise<Event[]> {
   }
 }
 
+export interface Column {
+  id: string;
+  title: string;
+  content: string;
+  imageUrl: string;
+  author: string;
+  category: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export async function getColumns(): Promise<Column[]> {
+  try {
+    const data = await fetchLatestBlob("hanui-columns");
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export async function getPopup(): Promise<Popup> {
   const defaultPopup: Popup = {
     isActive: false,

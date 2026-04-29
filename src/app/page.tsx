@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { label: "진료안내", href: "#info" },
   { label: "오시는 길", href: "#location" },
   { label: "이벤트", href: "/events" },
+  { label: "건강칼럼", href: "/columns" },
 ];
 
 const STATS = [

@@ -14,6 +14,17 @@ interface Event {
   createdAt: string;
 }
 
+interface Column {
+  id: string;
+  title: string;
+  content: string;
+  imageUrl: string;
+  author: string;
+  category: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 interface Popup {
   isActive: boolean;
   title: string;
@@ -31,8 +42,10 @@ export default function AdminPage() {
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState("");
 
-  const [tab, setTab] = useState<"events" | "popup">("events");
+  const [tab, setTab] = useState<"events" | "columns" | "popup">("events");
   const [events, setEvents] = useState<Event[]>([]);
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [editingColumn, setEditingColumn] = useState<Partial<Column> | null>(null);
   const [popup, setPopup] = useState<Popup>({
     isActive: false,
     title: "",
@@ -68,6 +81,7 @@ export default function AdminPage() {
   useEffect(() => {
     if (authed) {
       fetchEvents();
+      fetchColumns();
       fetchPopup();
     }
   }, [authed]);
@@ -104,6 +118,12 @@ export default function AdminPage() {
     const res = await fetch("/api/events");
     const data = await res.json();
     setEvents(data);
+  };
+
+  const fetchColumns = async () => {
+    const res = await fetch("/api/columns");
+    const data = await res.json();
+    setColumns(data);
   };
 
   const fetchPopup = async () => {
@@ -286,6 +306,16 @@ export default function AdminPage() {
             }`}
           >
             이벤트 관리
+          </button>
+          <button
+            onClick={() => setTab("columns")}
+            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+              tab === "columns"
+                ? "border-[#8B1A2B] text-[#8B1A2B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            칼럼 관리
           </button>
           <button
             onClick={() => setTab("popup")}
@@ -491,6 +521,111 @@ export default function AdminPage() {
                       >
                         <Trash2 size={16} />
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── 칼럼 탭 ── */}
+        {tab === "columns" && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-gray-900">칼럼 목록</h2>
+              <button
+                onClick={() => setEditingColumn({ title: "", content: "", imageUrl: "", author: "", category: "", isActive: true })}
+                className="flex items-center gap-2 bg-[#8B1A2B] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7a1626] transition"
+              >
+                <Plus size={16} /> 새 칼럼
+              </button>
+            </div>
+
+            {editingColumn && (
+              <div className="bg-white rounded-2xl border border-[#8B1A2B]/20 p-6 mb-6 shadow-sm">
+                <h3 className="font-bold text-gray-800 mb-4">{editingColumn.id ? "칼럼 수정" : "새 칼럼 작성"}</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">제목 *</label>
+                    <input type="text" value={editingColumn.title || ""} onChange={(e) => setEditingColumn({ ...editingColumn, title: e.target.value })} placeholder="칼럼 제목" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 mb-1 block">작성자</label>
+                      <input type="text" value={editingColumn.author || ""} onChange={(e) => setEditingColumn({ ...editingColumn, author: e.target.value })} placeholder="예: 김현규 대표원장" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 mb-1 block">카테고리</label>
+                      <input type="text" value={editingColumn.category || ""} onChange={(e) => setEditingColumn({ ...editingColumn, category: e.target.value })} placeholder="예: 척추·관절, 다이어트" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">내용 *</label>
+                    <textarea value={editingColumn.content || ""} onChange={(e) => setEditingColumn({ ...editingColumn, content: e.target.value })} placeholder="칼럼 내용을 입력하세요 (줄바꿈 가능)" rows={10} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B] resize-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">대표 이미지</label>
+                    <div className="flex gap-2">
+                      <input type="text" value={editingColumn.imageUrl || ""} onChange={(e) => setEditingColumn({ ...editingColumn, imageUrl: e.target.value })} placeholder="이미지 URL 또는 아래 업로드" className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]" />
+                      <label className="flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-200 transition whitespace-nowrap cursor-pointer">
+                        <Upload size={14} /> 업로드
+                        <input type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleImagePick(file, (url) => setEditingColumn((prev) => ({ ...prev, imageUrl: url }))); }} />
+                      </label>
+                    </div>
+                    {editingColumn.imageUrl && <img src={editingColumn.imageUrl} alt="미리보기" className="mt-2 h-32 object-cover rounded-lg border border-gray-200" />}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="colActive" checked={editingColumn.isActive ?? true} onChange={(e) => setEditingColumn({ ...editingColumn, isActive: e.target.checked })} className="accent-[#8B1A2B]" />
+                    <label htmlFor="colActive" className="text-sm text-gray-700">즉시 게시</label>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-5">
+                  <button
+                    onClick={async () => {
+                      if (!editingColumn?.title || !editingColumn?.content) { showMsg("제목과 내용을 입력해주세요."); return; }
+                      setLoading(true);
+                      try {
+                        const method = editingColumn.id ? "PUT" : "POST";
+                        const res = await fetch("/api/columns", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: pw, ...editingColumn }) });
+                        if (res.status === 401) { showMsg("비밀번호가 틀렸습니다."); logout(); return; }
+                        await fetchColumns();
+                        setEditingColumn(null);
+                        showMsg(editingColumn.id ? "칼럼이 수정되었습니다." : "칼럼이 등록되었습니다.");
+                      } catch { showMsg("저장 실패"); } finally { setLoading(false); }
+                    }}
+                    disabled={loading}
+                    className="flex items-center gap-2 bg-[#8B1A2B] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#7a1626] disabled:opacity-50 transition"
+                  >
+                    <Save size={15} /> {editingColumn.id ? "수정 저장" : "등록"}
+                  </button>
+                  <button onClick={() => setEditingColumn(null)} className="px-5 py-2 rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition">취소</button>
+                </div>
+              </div>
+            )}
+
+            {columns.length === 0 ? (
+              <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100"><p>등록된 칼럼이 없습니다.</p></div>
+            ) : (
+              <div className="space-y-3">
+                {columns.map((col) => (
+                  <div key={col.id} className={`bg-white rounded-xl border p-4 flex gap-4 items-start ${col.isActive ? "border-gray-100" : "border-gray-100 opacity-60"}`}>
+                    {col.imageUrl && <img src={col.imageUrl} alt={col.title} className="w-20 h-16 object-cover rounded-lg flex-shrink-0" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${col.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>{col.isActive ? "게시중" : "숨김"}</span>
+                        {col.category && <span className="text-xs bg-[#fdf3f4] text-[#8B1A2B] px-2 py-0.5 rounded-full">{col.category}</span>}
+                        <span className="text-xs text-gray-400">{new Date(col.createdAt).toLocaleDateString("ko-KR")}</span>
+                      </div>
+                      <p className="font-medium text-gray-900 truncate">{col.title}</p>
+                      {col.author && <p className="text-xs text-gray-500 mt-0.5">{col.author}</p>}
+                    </div>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button onClick={async () => { setLoading(true); await fetch("/api/columns", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: pw, id: col.id, isActive: !col.isActive }) }); await fetchColumns(); setLoading(false); }} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition" title={col.isActive ? "숨기기" : "게시하기"}>
+                        {col.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                      <button onClick={() => setEditingColumn(col)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"><Edit2 size={16} /></button>
+                      <button onClick={async () => { if (!confirm("칼럼을 삭제하시겠습니까?")) return; setLoading(true); await fetch("/api/columns", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: pw, id: col.id }) }); await fetchColumns(); showMsg("삭제되었습니다."); setLoading(false); }} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition"><Trash2 size={16} /></button>
                     </div>
                   </div>
                 ))}
