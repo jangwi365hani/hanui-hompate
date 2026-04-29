@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Plus, Trash2, Edit2, Eye, EyeOff, Save, LogOut, Bell, BellOff, Upload } from "lucide-react";
+import { Plus, Trash2, Edit2, Eye, EyeOff, Save, LogOut, Bell, BellOff, Upload, Sparkles, StopCircle } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 
 interface Event {
@@ -58,6 +58,10 @@ export default function AdminPage() {
   const [editingEvent, setEditingEvent] = useState<Partial<Event> | null>(null);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
+  const [aiTopic, setAiTopic] = useState("");
+  const [aiMode, setAiMode] = useState<"draft" | "expand" | "polish">("draft");
+  const [aiLoading, setAiLoading] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
@@ -118,6 +122,56 @@ export default function AdminPage() {
     const res = await fetch("/api/events");
     const data = await res.json();
     setEvents(data);
+  };
+
+  const runAI = async () => {
+    if (!editingColumn) return;
+    if (aiMode === "draft" && !aiTopic) { showMsg("주제를 입력해주세요."); return; }
+    if (aiMode !== "draft" && !editingColumn.content) { showMsg("먼저 내용을 입력해주세요."); return; }
+
+    setAiLoading(true);
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: pw,
+          mode: aiMode,
+          topic: aiTopic,
+          title: editingColumn.title,
+          currentContent: editingColumn.content,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        showMsg(err.error || "AI 오류");
+        return;
+      }
+
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let result = "";
+
+      // 초안은 새로 작성, 나머지는 기존 내용 교체
+      setEditingColumn((prev) => ({ ...prev, content: "" }));
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += decoder.decode(value, { stream: true });
+        setEditingColumn((prev) => ({ ...prev, content: result }));
+      }
+    } catch (e) {
+      if ((e as Error).name !== "AbortError") showMsg("AI 생성 실패");
+    } finally {
+      setAiLoading(false);
+      abortRef.current = null;
+    }
   };
 
   const fetchColumns = async () => {
@@ -560,9 +614,62 @@ export default function AdminPage() {
                       <input type="text" value={editingColumn.category || ""} onChange={(e) => setEditingColumn({ ...editingColumn, category: e.target.value })} placeholder="예: 척추·관절, 다이어트" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]" />
                     </div>
                   </div>
+                  {/* AI 글쓰기 도우미 */}
+                  <div className="bg-gradient-to-br from-[#fdf3f4] to-purple-50 rounded-xl p-4 border border-[#f5e0e3]">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Sparkles size={15} className="text-[#8B1A2B]" />
+                      <span className="text-sm font-bold text-[#8B1A2B]">AI 글쓰기 도우미</span>
+                    </div>
+                    <div className="flex gap-2 mb-3">
+                      {(["draft", "expand", "polish"] as const).map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setAiMode(m)}
+                          className={`text-xs px-3 py-1.5 rounded-full font-medium transition ${aiMode === m ? "bg-[#8B1A2B] text-white" : "bg-white text-gray-600 border border-gray-200 hover:border-[#8B1A2B]"}`}
+                        >
+                          {m === "draft" ? "✍️ 초안 작성" : m === "expand" ? "📝 내용 보완" : "✨ 문체 다듬기"}
+                        </button>
+                      ))}
+                    </div>
+                    {aiMode === "draft" && (
+                      <input
+                        type="text"
+                        value={aiTopic}
+                        onChange={(e) => setAiTopic(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && runAI()}
+                        placeholder="주제 입력 (예: 봄철 환절기 면역력 관리)"
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-[#8B1A2B] bg-white"
+                      />
+                    )}
+                    {aiMode !== "draft" && (
+                      <p className="text-xs text-gray-500 mb-3">아래 내용을 바탕으로 AI가 {aiMode === "expand" ? "내용을 보완" : "문체를 다듬어"}합니다.</p>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={runAI}
+                        disabled={aiLoading}
+                        className="flex items-center gap-2 bg-[#8B1A2B] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7a1626] disabled:opacity-50 transition"
+                      >
+                        <Sparkles size={14} />
+                        {aiLoading ? "생성 중..." : "AI 작성"}
+                      </button>
+                      {aiLoading && (
+                        <button
+                          type="button"
+                          onClick={() => { abortRef.current?.abort(); setAiLoading(false); }}
+                          className="flex items-center gap-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300 transition"
+                        >
+                          <StopCircle size={14} /> 중단
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1 block">내용 *</label>
-                    <textarea value={editingColumn.content || ""} onChange={(e) => setEditingColumn({ ...editingColumn, content: e.target.value })} placeholder="칼럼 내용을 입력하세요 (줄바꿈 가능)" rows={10} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B] resize-none" />
+                    <textarea value={editingColumn.content || ""} onChange={(e) => setEditingColumn({ ...editingColumn, content: e.target.value })} placeholder="칼럼 내용을 입력하거나 위 AI 도우미를 활용해보세요" rows={10} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B] resize-none" />
                   </div>
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1 block">대표 이미지</label>
