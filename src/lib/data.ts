@@ -74,3 +74,32 @@ export async function getPopup(): Promise<Popup> {
     return defaultPopup;
   }
 }
+
+export interface HandoverAccount {
+  id: string;
+  name: string;
+  role: "doc" | "staff";
+  since: string;
+  memo: string;
+}
+
+export interface HandoverItem {
+  memo: string;
+  checked: boolean;
+  date: string;
+}
+
+export interface HandoverData {
+  accounts: HandoverAccount[];
+  items: Record<string, Record<string, HandoverItem[]>>;
+}
+
+export async function getHandover(): Promise<HandoverData> {
+  const def: HandoverData = { accounts: [], items: {} };
+  try {
+    const data = await fetchLatestBlob("hanui-handover");
+    return data ?? def;
+  } catch {
+    return def;
+  }
+}

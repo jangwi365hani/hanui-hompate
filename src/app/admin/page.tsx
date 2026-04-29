@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Edit2, Eye, EyeOff, Save, LogOut, Bell, BellOff, Upload, Sparkles, StopCircle } from "lucide-react";
 import { upload } from "@vercel/blob/client";
+import HandoverTab from "@/components/HandoverTab";
 
 interface Event {
   id: string;
@@ -42,7 +43,7 @@ export default function AdminPage() {
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState("");
 
-  const [tab, setTab] = useState<"events" | "columns" | "popup">("events");
+  const [tab, setTab] = useState<"events" | "columns" | "popup" | "handover">("events");
   const [events, setEvents] = useState<Event[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
   const [editingColumn, setEditingColumn] = useState<Partial<Column> | null>(null);
@@ -380,6 +381,16 @@ export default function AdminPage() {
             }`}
           >
             팝업 관리
+          </button>
+          <button
+            onClick={() => setTab("handover")}
+            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+              tab === "handover"
+                ? "border-[#8B1A2B] text-[#8B1A2B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            인계장
           </button>
           <a
             href="/"
@@ -740,6 +751,9 @@ export default function AdminPage() {
             )}
           </div>
         )}
+
+        {/* ── 인계장 탭 ── */}
+        {tab === "handover" && <HandoverTab pw={pw} />}
 
         {/* ── 팝업 탭 ── */}
         {tab === "popup" && (
