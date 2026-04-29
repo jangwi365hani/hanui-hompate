@@ -205,7 +205,7 @@ export default function HandoverTab({ pw }: { pw: string }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-bold text-gray-900">티칭 인계 관리</h2>
+        <h2 className="text-lg font-bold text-gray-900">직원 인계 관리</h2>
         <button
           onClick={() => setShowAdd(true)}
           className="flex items-center gap-2 bg-[#8B1A2B] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7a1626] transition"
