@@ -40,6 +40,7 @@ const STORAGE_KEY = "admin-pw";
 export default function AdminPage() {
   const [pw, setPw] = useState("");
   const [authed, setAuthed] = useState(false);
+  const [loginRole, setLoginRole] = useState<"doc" | "staff">("staff");
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState("");
 
@@ -67,14 +68,16 @@ export default function AdminPage() {
   useEffect(() => {
     const saved = sessionStorage.getItem(STORAGE_KEY);
     if (saved) {
-      // 저장된 비밀번호 서버 검증
       fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: saved }),
-      }).then((res) => {
+      }).then(async (res) => {
         if (res.ok) {
+          const data = await res.json();
           setPw(saved);
+          setLoginRole(data.role ?? "staff");
+          setTab(data.role === "doc" ? "events" : "handover");
           setAuthed(true);
         } else {
           sessionStorage.removeItem(STORAGE_KEY);
@@ -84,12 +87,12 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (authed) {
+    if (authed && loginRole === "doc") {
       fetchEvents();
       fetchColumns();
       fetchPopup();
     }
-  }, [authed]);
+  }, [authed, loginRole]);
 
   const login = async () => {
     if (!pwInput) return;
@@ -100,7 +103,10 @@ export default function AdminPage() {
         body: JSON.stringify({ password: pwInput }),
       });
       if (res.ok) {
+        const data = await res.json();
         setPw(pwInput);
+        setLoginRole(data.role ?? "staff");
+        setTab(data.role === "doc" ? "events" : "handover");
         sessionStorage.setItem(STORAGE_KEY, pwInput);
         setAuthed(true);
         setPwError("");
@@ -117,6 +123,7 @@ export default function AdminPage() {
     setAuthed(false);
     setPw("");
     setPwInput("");
+    setLoginRole("staff");
   };
 
   const fetchEvents = async () => {
@@ -352,36 +359,40 @@ export default function AdminPage() {
       {/* 탭 */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 flex gap-1">
-          <button
-            onClick={() => setTab("events")}
-            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
-              tab === "events"
-                ? "border-[#8B1A2B] text-[#8B1A2B]"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            이벤트 관리
-          </button>
-          <button
-            onClick={() => setTab("columns")}
-            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
-              tab === "columns"
-                ? "border-[#8B1A2B] text-[#8B1A2B]"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            칼럼 관리
-          </button>
-          <button
-            onClick={() => setTab("popup")}
-            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
-              tab === "popup"
-                ? "border-[#8B1A2B] text-[#8B1A2B]"
-                : "border-transparent text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            팝업 관리
-          </button>
+          {loginRole === "doc" && (
+            <>
+              <button
+                onClick={() => setTab("events")}
+                className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+                  tab === "events"
+                    ? "border-[#8B1A2B] text-[#8B1A2B]"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                이벤트 관리
+              </button>
+              <button
+                onClick={() => setTab("columns")}
+                className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+                  tab === "columns"
+                    ? "border-[#8B1A2B] text-[#8B1A2B]"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                칼럼 관리
+              </button>
+              <button
+                onClick={() => setTab("popup")}
+                className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+                  tab === "popup"
+                    ? "border-[#8B1A2B] text-[#8B1A2B]"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                팝업 관리
+              </button>
+            </>
+          )}
           <button
             onClick={() => setTab("handover")}
             className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
@@ -753,7 +764,7 @@ export default function AdminPage() {
         )}
 
         {/* ── 인계장 탭 ── */}
-        {tab === "handover" && <HandoverTab pw={pw} />}
+        {tab === "handover" && <HandoverTab pw={pw} loginRole={loginRole} />}
 
         {/* ── 팝업 탭 ── */}
         {tab === "popup" && (

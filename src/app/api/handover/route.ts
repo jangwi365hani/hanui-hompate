@@ -4,7 +4,8 @@ import type { HandoverData, HandoverAccount, HandoverItem } from "@/lib/data";
 import { getHandover } from "@/lib/data";
 
 const PREFIX = "hanui-handover";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1234";
+const DOCTOR_PASSWORD = process.env.ADMIN_PASSWORD || "jw5416200227!";
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
 
 const STAFF_PARTS: Record<string, string[]> = {
   데스크: ["전화 응대", "EMR 접수/수납", "보험 청구", "문진표 관리", "대기실 안내"],
@@ -32,7 +33,8 @@ async function saveHandover(data: HandoverData) {
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  if (url.searchParams.get("pw") !== ADMIN_PASSWORD)
+  const pw = url.searchParams.get("pw");
+  if (pw !== DOCTOR_PASSWORD && pw !== STAFF_PASSWORD)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const data = await getHandover();
   return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
@@ -41,7 +43,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const body = await req.json();
   const { password, action } = body;
-  if (password !== ADMIN_PASSWORD)
+  if (password !== DOCTOR_PASSWORD && password !== STAFF_PASSWORD)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const data = await getHandover();

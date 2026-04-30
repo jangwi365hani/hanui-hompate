@@ -39,13 +39,13 @@ function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function HandoverTab({ pw }: { pw: string }) {
+export default function HandoverTab({ pw, loginRole }: { pw: string; loginRole: "doc" | "staff" }) {
   const [data, setData] = useState<HandoverData>({ accounts: [], items: {} });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activePart, setActivePart] = useState("__all__");
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [newAcc, setNewAcc] = useState({ name: "", role: "staff" as "doc" | "staff", since: today() });
+  const [newAcc, setNewAcc] = useState({ name: "", role: loginRole, since: today() });
   const memoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const itemTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
@@ -67,7 +67,8 @@ export default function HandoverTab({ pw }: { pw: string }) {
     fetchData().then((d) => {
       if (d) {
         setData(d);
-        if (d.accounts.length > 0) setSelectedId(d.accounts[0].id);
+        const first = d.accounts.find((a) => a.role === loginRole);
+        if (first) setSelectedId(first.id);
       }
       setLoading(false);
     });
@@ -75,11 +76,18 @@ export default function HandoverTab({ pw }: { pw: string }) {
 
   const reload = async () => {
     const d = await fetchData();
-    if (d) setData(d);
+    if (d) {
+      setData(d);
+      if (!selectedId) {
+        const first = d.accounts.find((a) => a.role === loginRole);
+        if (first) setSelectedId(first.id);
+      }
+    }
     return d;
   };
 
-  const selected = data.accounts.find((a) => a.id === selectedId);
+  const visibleAccounts = data.accounts.filter((a) => a.role === loginRole);
+  const selected = visibleAccounts.find((a) => a.id === selectedId);
   const parts = selected ? (selected.role === "doc" ? DOC_PARTS : STAFF_PARTS) : [];
   const items = selectedId ? (data.items[selectedId] ?? {}) : {};
 
@@ -106,7 +114,7 @@ export default function HandoverTab({ pw }: { pw: string }) {
       return { accounts, items: rest };
     });
     if (selectedId === id) {
-      const remaining = data.accounts.filter((a) => a.id !== id);
+      const remaining = visibleAccounts.filter((a) => a.id !== id);
       setSelectedId(remaining[0]?.id ?? null);
     }
   };
@@ -268,7 +276,7 @@ export default function HandoverTab({ pw }: { pw: string }) {
         </div>
       )}
 
-      {data.accounts.length === 0 ? (
+      {visibleAccounts.length === 0 ? (
         <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
           <p>등록된 계정이 없습니다. 계정을 추가해주세요.</p>
         </div>
@@ -276,7 +284,7 @@ export default function HandoverTab({ pw }: { pw: string }) {
         <>
           {/* 계정 그리드 */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 mb-5">
-            {data.accounts.map((acc) => (
+            {visibleAccounts.map((acc) => (
               <div
                 key={acc.id}
                 onClick={() => { setSelectedId(acc.id); setActivePart("__all__"); }}
