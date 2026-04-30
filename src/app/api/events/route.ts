@@ -4,7 +4,9 @@ import type { Event } from "@/lib/data";
 import { getEvents } from "@/lib/data";
 
 const EVENTS_PREFIX = "hanui-events";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1234";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "jw5416200227!";
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
+const isValidPassword = (pw: string) => pw === ADMIN_PASSWORD || pw === STAFF_PASSWORD;
 
 async function saveEvents(events: Event[]) {
   const { blobs } = await list({ prefix: EVENTS_PREFIX });
@@ -24,7 +26,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const body = await req.json();
   const { password, ...eventData } = body;
-  if (password !== ADMIN_PASSWORD)
+  if (!isValidPassword(password))
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const events = await getEvents();
@@ -45,7 +47,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   const body = await req.json();
   const { password, id, ...updateData } = body;
-  if (password !== ADMIN_PASSWORD)
+  if (!isValidPassword(password))
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const events = await getEvents();
@@ -59,7 +61,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   const body = await req.json();
   const { password, id } = body;
-  if (password !== ADMIN_PASSWORD)
+  if (!isValidPassword(password))
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const events = await getEvents();

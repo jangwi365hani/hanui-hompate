@@ -4,7 +4,9 @@ import { getPopup } from "@/lib/data";
 import type { Popup } from "@/lib/data";
 
 const POPUP_PREFIX = "hanui-popup";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1234";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "jw5416200227!";
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
+const isValidPassword = (pw: string) => pw === ADMIN_PASSWORD || pw === STAFF_PASSWORD;
 
 export async function GET() {
   const popup = await getPopup();
@@ -14,7 +16,7 @@ export async function GET() {
 export async function PUT(req: Request) {
   const body = await req.json();
   const { password, ...popupData } = body;
-  if (password !== ADMIN_PASSWORD)
+  if (!isValidPassword(password))
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const current = await getPopup();
