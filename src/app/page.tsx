@@ -85,7 +85,13 @@ export default function Home() {
               </a>
             ))}
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <a
+              href="/reservation"
+              className="hidden md:flex items-center gap-1.5 bg-[#8B1A2B] text-white text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-[#7a1626] transition-colors duration-200 shadow-sm"
+            >
+              예약현황
+            </a>
             <a
               href={NAVER_BOOKING}
               target="_blank"
@@ -110,6 +116,9 @@ export default function Home() {
                 {l.label}
               </a>
             ))}
+            <a href="/reservation" className="flex items-center gap-2 text-[#8B1A2B] font-bold">
+              예약현황
+            </a>
             <a href={NAVER_BOOKING} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#03C75A] font-bold">
               <NaverBadge /> 네이버 예약
             </a>
