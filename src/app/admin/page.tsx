@@ -77,7 +77,7 @@ export default function AdminPage() {
           const data = await res.json();
           setPw(saved);
           setLoginRole(data.role ?? "staff");
-          setTab(data.role === "doc" ? "events" : "handover");
+          setTab("events");
           setAuthed(true);
         } else {
           sessionStorage.removeItem(STORAGE_KEY);
@@ -87,10 +87,10 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (authed && loginRole === "doc") {
+    if (authed) {
       fetchEvents();
-      fetchColumns();
       fetchPopup();
+      if (loginRole === "doc") fetchColumns();
     }
   }, [authed, loginRole]);
 
@@ -106,7 +106,7 @@ export default function AdminPage() {
         const data = await res.json();
         setPw(pwInput);
         setLoginRole(data.role ?? "staff");
-        setTab(data.role === "doc" ? "events" : "handover");
+        setTab("events");
         sessionStorage.setItem(STORAGE_KEY, pwInput);
         setAuthed(true);
         setPwError("");
@@ -359,40 +359,38 @@ export default function AdminPage() {
       {/* 탭 */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 flex gap-1">
+          <button
+            onClick={() => setTab("events")}
+            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+              tab === "events"
+                ? "border-[#8B1A2B] text-[#8B1A2B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            이벤트 관리
+          </button>
           {loginRole === "doc" && (
-            <>
-              <button
-                onClick={() => setTab("events")}
-                className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
-                  tab === "events"
-                    ? "border-[#8B1A2B] text-[#8B1A2B]"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                이벤트 관리
-              </button>
-              <button
-                onClick={() => setTab("columns")}
-                className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
-                  tab === "columns"
-                    ? "border-[#8B1A2B] text-[#8B1A2B]"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                칼럼 관리
-              </button>
-              <button
-                onClick={() => setTab("popup")}
-                className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
-                  tab === "popup"
-                    ? "border-[#8B1A2B] text-[#8B1A2B]"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                팝업 관리
-              </button>
-            </>
+            <button
+              onClick={() => setTab("columns")}
+              className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+                tab === "columns"
+                  ? "border-[#8B1A2B] text-[#8B1A2B]"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              칼럼 관리
+            </button>
           )}
+          <button
+            onClick={() => setTab("popup")}
+            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+              tab === "popup"
+                ? "border-[#8B1A2B] text-[#8B1A2B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            팝업 관리
+          </button>
           <button
             onClick={() => setTab("handover")}
             className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
