@@ -362,6 +362,17 @@ export default function Home() {
                 <Image src="/images/parkingexplain.jpg" alt="주차 이용 안내" fill className="object-contain p-2" />
               </div>
             </div>
+            <div className="border-t border-gray-100 bg-white">
+              <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src="https://www.youtube.com/embed/nzwte9M5FOg"
+                  title="주차장 안내 영상"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
