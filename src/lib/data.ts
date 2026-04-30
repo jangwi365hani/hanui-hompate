@@ -94,6 +94,24 @@ export interface HandoverData {
   items: Record<string, Record<string, HandoverItem[]>>;
 }
 
+export interface WikiArticle {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getWiki(): Promise<WikiArticle[]> {
+  try {
+    const data = await fetchLatestBlob("hanui-wiki");
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export async function getHandover(): Promise<HandoverData> {
   const def: HandoverData = { accounts: [], items: {} };
   try {
