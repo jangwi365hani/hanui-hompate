@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약 가능 시간 — 장위365경희한의원</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f5f4f0;padding:1.5rem;color:#1a1a1a;}
+.board{max-width:900px;margin:0 auto;}
+.top{margin-bottom:1.25rem;}
+.ttl{font-size:20px;font-weight:600;color:#111;}
+.sub{font-size:13px;color:#888;margin-top:4px;}
+.legend-row{display:flex;align-items:center;gap:14px;margin-bottom:1rem;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:5px;font-size:12px;color:#888;}
+.leg-dot{width:10px;height:10px;border-radius:50%;}
+.wrap{overflow-x:auto;border:0.5px solid #ddd;border-radius:14px;background:#fff;}
+table{border-collapse:collapse;min-width:100%;table-layout:fixed;}
+thead th{padding:10px 4px;font-size:12px;font-weight:500;color:#888;border-bottom:0.5px solid #e5e5e5;border-right:0.5px solid #e5e5e5;background:#fafaf8;text-align:center;white-space:nowrap;}
+thead th:last-child{border-right:none;}
+thead th.time-hdr{width:54px;min-width:54px;}
+thead th.day-hdr{min-width:90px;}
+thead th.today-hdr{background:#E6F1FB;color:#0C447C;font-weight:700;}
+thead th.weekend-hdr{color:#A32D2D;}
+tbody tr td{border-bottom:0.5px solid #ebebeb;border-right:0.5px solid #ebebeb;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr td:last-child{border-right:none;}
+td.time-cell{font-size:15px;font-weight:700;color:#444;padding:0 10px;text-align:right;background:#fafaf8;white-space:nowrap;height:58px;vertical-align:middle;}
+td.lunch-cell{font-size:12px;color:#bbb;text-align:center;padding:10px 4px;background:#f5f4f0;}
+td.slot-cell{padding:7px 5px;text-align:center;height:58px;vertical-align:middle;}
+td.slot-cell.today-col{background:#fafeff;}
+.badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 0;border-radius:22px;font-size:15px;font-weight:700;width:68px;}
+.badge.avail{background:#EAF3DE;color:#3B6D11;border:1.5px solid #97C459;}
+.badge.warn{background:#FAEEDA;color:#854F0B;border:1.5px solid #FAC775;}
+.badge.full{background:#f0efe9;color:#aaa;border:1px solid #ddd;}
+.badge.oor{color:#ddd;font-size:13px;font-weight:400;border:none;background:transparent;}
+</style>
+</head>
+<body>
+<div class="board">
+  <div class="top">
+    <div class="ttl">예약 가능 시간 안내</div>
+    <div class="sub">장위365경희한의원 &nbsp;·&nbsp; <span id="week-range"></span></div>
+  </div>
+  <div class="legend-row">
+    <div class="leg">
+      <div style="width:80px;height:10px;border-radius:5px;background:linear-gradient(to right,#4CAF50,#CDDC39,#FFC107,#F44336);"></div>
+      <span style="margin-left:6px;">여유 → 혼잡</span>
+    </div>
+    <div class="leg"><div class="leg-dot" style="background:#aaa;"></div>마감</div>
+    <span id="load-status" style="margin-left:auto;font-size:11px;color:#888;">불러오는 중…</span>
+  </div>
+  <div class="wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+</div>
+
+<script>
+const STAY=40,SLOT=15,MAX=16,LS=13*60,LE=14*60,MAX_DOC_HOUR=10;
+const DAYS_KO=['일','월','화','수','목','금','토'];
+let DOCTORS=[];
+let S={};
+const REFRESH_MS=2*60*1000;
+
+function ptWeight(p){const n=p.notice||'';if(n.includes('약상담'))return 3;if(n.includes('추나')||n.includes('약추패')||n.includes('약추'))return 2;return 1;}
+function t2m(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
+function m2t(m){return`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;}
+function dateKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+const HOLIDAYS={'2026-05-01':17*60,'2026-05-05':17*60,'2026-06-06':17*60,'2026-08-15':17*60,'2026-10-03':17*60,'2026-10-09':17*60};
+function isWeekend(d){const w=d.getDay();return w===0||w===6;}
+function endMin(d){const dk=dateKey(d);if(HOLIDAYS[dk]!==undefined)return HOLIDAYS[dk];return isWeekend(d)?17*60:21*60;}
+function isClosed(d,sM){
+  if(sM>12*60+20&&sM<LE)return true;
+  if(sM>endMin(d)-STAY)return true;
+  return false;
+}
+function getWeekDates(){
+  const t=new Date();t.setHours(0,0,0,0);
+  return Array.from({length:7},(_,i)=>{const d=new Date(t);d.setDate(t.getDate()+i);return d;});
+}
+function getOccupied(dk,sM){
+  if(!S[dk])return 0;
+  let c=0;
+  for(const[t,pts] of Object.entries(S[dk])){
+    const tM=t2m(t);if(tM<=sM&&sM<tM+STAY)c+=pts.length;
+  }
+  return c;
+}
+function getDocHourCount(dk,sM,docName){
+  if(!S[dk])return 0;
+  const hS=Math.floor(sM/60)*60,hE=hS+60;
+  let c=0;
+  for(const[t,pts] of Object.entries(S[dk])){
+    const tM=t2m(t);
+    if(tM>=hS&&tM<hE)c+=pts.filter(p=>p.doc===docName).reduce((s,p)=>s+ptWeight(p),0);
+  }
+  return c;
+}
+function activeSlots(dateObj){
+  const slots=[];let cur=10*60;const end=endMin(dateObj);
+  while(cur<end){
+    if(cur>=LS&&cur<LE){cur+=SLOT;continue;}
+    if(!isClosed(dateObj,cur))slots.push(m2t(cur));
+    cur+=SLOT;
+  }
+  return slots;
+}
+function buildGroups(dateObj,dk){
+  const slots=activeSlots(dateObj);
+  const groups=[];let grp=null;
+  for(const s of slots){
+    if(!grp)grp={slots:[],pCount:0};
+    grp.slots.push(s);
+    grp.pCount+=((S[dk]||{})[s]||[]).length;
+    if(grp.pCount>=4){groups.push({...grp});grp=null;}
+  }
+  if(grp&&grp.slots.length>0)groups.push(grp);
+  return groups;
+}
+function getGrp(dateObj,dk,sT){return buildGroups(dateObj,dk).find(g=>g.slots.includes(sT))||null;}
+function grpCnt(dk,grp){return grp.slots.reduce((a,s)=>a+((S[dk]||{})[s]||[]).length,0);}
+function getGmax(sT){return(sT==='10:00'||sT==='14:00')?12:4;}
+// 체류 구간(40분) 전체의 최대 베드 점유 — 예약 시점만 보면 중간에 초과하는 경우를 못 잡음
+function peakOccupied(dk,sM){
+  let peak=0;
+  for(let t=sM;t<sM+STAY;t+=SLOT)peak=Math.max(peak,getOccupied(dk,t));
+  return peak;
+}
+function isPast(dateObj,sT){
+  const now=new Date(),d=new Date(dateObj);
+  d.setHours(...sT.split(':').map(Number),0,0);
+  return d<now;
+}
+
+// 점유율(0~1)에 따라 배지 색상을 스펙트럼으로 보간 (초록→노랑→주황→빨강)
+function spectrumStyle(ratio){
+  const steps=[
+    {r:0,   bg:[232,245,220],fg:[45,100,10], bd:[140,190,80]},
+    {r:0.4, bg:[255,252,210],fg:[130,110,0], bd:[210,190,60]},
+    {r:0.65,bg:[255,238,200],fg:[160,90,0],  bd:[240,180,80]},
+    {r:0.85,bg:[255,220,200],fg:[180,60,0],  bd:[240,140,80]},
+    {r:1,   bg:[252,228,225],fg:[180,40,40], bd:[240,130,130]},
+  ];
+  const clamped=Math.max(0,Math.min(1,ratio));
+  let i=0;
+  while(i<steps.length-2&&clamped>steps[i+1].r)i++;
+  const a=steps[i],b=steps[i+1];
+  const t=b.r===a.r?1:(clamped-a.r)/(b.r-a.r);
+  const lerp=(x,y)=>Math.round(x+(y-x)*t);
+  const rgb=(p,q)=>`rgb(${lerp(p[0],q[0])},${lerp(p[1],q[1])},${lerp(p[2],q[2])})`;
+  return{bg:rgb(a.bg,b.bg),fg:rgb(a.fg,b.fg),bd:rgb(a.bd,b.bd)};
+}
+
+// 해당 시간(시 단위) 가용성 판단 — {avail, maxOcc, anyFuture} 반환
+// anyFuture: 과거/휴식이 아닌 슬롯이 하나라도 있는지 (없으면 단순 마감)
+function hourAvail(dateObj,dk,hour){
+  let anyAvail=false,maxOcc=0,anyFuture=false;
+  for(let min=0;min<60;min+=SLOT){
+    const sM=hour*60+min;
+    const sT=m2t(sM);
+    if(sM>=endMin(dateObj))continue;
+    if(isClosed(dateObj,sM))continue;
+    if(isPast(dateObj,sT))continue;
+    anyFuture=true;
+    const peakOcc=peakOccupied(dk,sM);
+    if(peakOcc>=MAX)continue;
+    anyAvail=true;
+    maxOcc=Math.max(maxOcc,peakOcc);
+  }
+  return{avail:anyAvail,maxOcc,anyFuture};
+}
+
+// 해당 시간대의 모든 슬롯이 영업 시간 밖인지
+function isHourOor(dateObj,hour){
+  for(let min=0;min<60;min+=SLOT){
+    const sM=hour*60+min;
+    if(sM<endMin(dateObj))return false;
+  }
+  return true;
+}
+
+const HOUR_ROWS=[10,11,12,'lunch',14,15,16,17,18,19,20];
+
+function render(){
+  const dates=getWeekDates();
+  const today=new Date();today.setHours(0,0,0,0);
+  const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
+  document.getElementById('week-range').textContent=`${fmt(dates[0])} ~ ${fmt(dates[6])}`;
+
+  let thead=`<tr><th class="time-hdr">시간</th>`;
+  for(const d of dates){
+    const isToday=d.getTime()===today.getTime(),we=isWeekend(d);
+    thead+=`<th class="day-hdr${isToday?' today-hdr':''}${we?' weekend-hdr':''}">
+      ${d.getMonth()+1}/${d.getDate()}<br>
+      <span style="font-size:13px;">${DAYS_KO[d.getDay()]}</span>
+      ${isToday?'<br><span style="font-size:10px;background:#E6F1FB;color:#0C447C;padding:1px 5px;border-radius:3px;font-weight:600;">오늘</span>':''}
+    </th>`;
+  }
+  document.getElementById('thead').innerHTML=thead+'</tr>';
+
+  let tbody='';
+  for(const row of HOUR_ROWS){
+    if(row==='lunch'){
+      tbody+=`<tr>
+        <td class="time-cell" style="font-size:12px;font-weight:500;color:#bbb;">점심</td>
+        ${Array(7).fill('<td class="lunch-cell">휴식</td>').join('')}
+      </tr>`;
+      continue;
+    }
+    const hour=row;
+    tbody+=`<tr><td class="time-cell">${hour}시</td>`;
+    for(const d of dates){
+      const dk=dateKey(d);
+      const isToday=d.getTime()===today.getTime();
+      let badge;
+      if(isHourOor(d,hour)){
+        badge=`<span class="badge oor">—</span>`;
+      } else {
+        const {avail,maxOcc,anyFuture}=hourAvail(d,dk,hour);
+        if(!anyFuture){
+          // 모든 슬롯이 과거 또는 휴식
+          badge=`<span class="badge full">마감</span>`;
+        } else if(!avail){
+          // 미래 슬롯 있지만 베드 전부 찬 상태
+          const s=spectrumStyle(1);
+          badge=`<span class="badge" style="background:${s.bg};color:${s.fg};border:1.5px solid ${s.bd};">거의마감</span>`;
+        } else {
+          const ratio=maxOcc/MAX;
+          const s=spectrumStyle(ratio);
+          const txt=ratio>=0.85?'혼잡':ratio>=0.65?'다소혼잡':'가능';
+          badge=`<span class="badge" style="background:${s.bg};color:${s.fg};border:1.5px solid ${s.bd};">${txt}</span>`;
+        }
+      }
+      // 해당 시간대에 한도(10명) 초과한 원장 표시
+      const HIDE=new Set(['미지정','data','']);
+      const ngDocs=DOCTORS.filter(doc=>!HIDE.has(doc)&&getDocHourCount(dk,hour*60,doc)>=MAX_DOC_HOUR);
+      const docTags=ngDocs.map(doc=>`<span style="display:inline-block;font-size:9px;color:#A32D2D;background:#FCEBEB;border:0.5px solid #F09595;border-radius:6px;padding:1px 5px;margin-top:3px;">${doc} 불가</span>`).join('');
+      tbody+=`<td class="slot-cell${isToday?' today-col':''}"><div style="display:flex;flex-direction:column;align-items:center;gap:0;">${badge}${docTags}</div></td>`;
+    }
+    tbody+='</tr>';
+  }
+  document.getElementById('tbody').innerHTML=tbody;
+}
+
+function setStatus(msg,color){
+  const el=document.getElementById('load-status');
+  if(el){el.textContent=msg;el.style.color=color||'#888';}
+}
+function dateToApiStr(d){
+  return`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function p2(n){return String(n).padStart(2,'0');}
+function toYYYYMMDD(d){return`${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}`;}
+function floorTo15(t){if(!t)return null;const[h,m]=t.split(':').map(Number);return`${p2(h)}:${p2(Math.floor(m/15)*15)}`;}
+
+async function loadData(){
+  setStatus('데이터 불러오는 중…','#888');
+  try{
+    const dates=getWeekDates();
+
+    // 원장 코드→이름 매핑
+    const docRes=await fetch('/api/doctors').then(r=>r.ok?r.json():[]).catch(()=>[]);
+    const DOC_MAP={};
+    docRes.forEach(d=>{DOC_MAP[d.code]=d.name;});
+
+    // 7일치 병렬 fetch
+    const results=await Promise.all(
+      dates.map(d=>
+        fetch(`/api/reservations?date=${toYYYYMMDD(d)}`)
+          .then(r=>{if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json();})
+      )
+    );
+
+    const newS={};
+    const docSet=new Set();
+    results.forEach((data,i)=>{
+      const dk=dateKey(dates[i]);
+      newS[dk]={};
+      (data.reservations||[]).forEach(r=>{
+        if(!r.time)return;
+        const slot=floorTo15(r.time);
+        if(!slot)return;
+        if(!newS[dk][slot])newS[dk][slot]=[];
+        const doc=DOC_MAP[r.drEmp]||String(r.drEmp||'').trim();
+        newS[dk][slot].push({name:r.name||'',doc,notice:r.notice||''});
+        if(doc)docSet.add(doc);
+      });
+    });
+    S=newS;
+    DOCTORS=[...docSet].sort();
+
+    const now=new Date();
+    setStatus(`마지막 갱신 ${p2(now.getHours())}:${p2(now.getMinutes())}`,'#888');
+  }catch(e){
+    console.error('loadData 실패:',e);
+    setStatus('DB 연결 실패 — 오프라인 모드','#A32D2D');
+  }
+  render();
+}
+
+loadData();
+setInterval(loadData,REFRESH_MS);
+</script>
+</body>
+</html>
