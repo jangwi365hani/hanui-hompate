@@ -20,7 +20,7 @@ const NAV_LINKS = [
 
 const STATS = [
   { num: "10+", label: "년 진료 경력" },
-  { num: "5,000+", label: "누적 환자" },
+  { num: "10,000+", label: "누적 환자" },
   { num: "365일", label: "연중 진료" },
   { num: "100%", label: "맞춤 치료" },
 ];
