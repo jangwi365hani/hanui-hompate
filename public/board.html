@@ -218,7 +218,7 @@ function render(){
         if(!anyFuture){
           // 모든 슬롯이 과거 또는 휴식
           badge=`<span class="badge full">마감</span>`;
-        } else if(hour===10&&fullSlots>=3){
+        } else if(fullSlots>=3){
           badge=`<span class="badge" style="background:#FFD0D0;color:#7B0000;border:2px solid #CC2222;">매우혼잡</span>`;
         } else if(!avail){
           // 미래 슬롯 있지만 베드 전부 찬 상태
