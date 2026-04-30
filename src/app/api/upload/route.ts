@@ -1,7 +1,8 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin1234";
+const DOCTOR_PASSWORD = process.env.ADMIN_PASSWORD || "jw5416200227!";
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
 
 export async function POST(request: Request): Promise<Response> {
   const body = (await request.json()) as HandleUploadBody;
@@ -12,7 +13,7 @@ export async function POST(request: Request): Promise<Response> {
       request,
       onBeforeGenerateToken: async (_pathname, clientPayload) => {
         const payload = JSON.parse(clientPayload || "{}");
-        if (payload.password !== ADMIN_PASSWORD) {
+        if (payload.password !== DOCTOR_PASSWORD && payload.password !== STAFF_PASSWORD) {
           throw new Error("Unauthorized");
         }
         return {
