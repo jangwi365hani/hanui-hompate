@@ -5,6 +5,7 @@ import { Plus, Trash2, Edit2, Eye, EyeOff, Save, LogOut, Bell, BellOff, Upload, 
 import { upload } from "@vercel/blob/client";
 import HandoverTab from "@/components/HandoverTab";
 import WikiTab from "@/components/WikiTab";
+import RichEditor from "@/components/RichEditor";
 
 interface Event {
   id: string;
@@ -700,7 +701,11 @@ export default function AdminPage() {
 
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1 block">내용 *</label>
-                    <textarea value={editingColumn.content || ""} onChange={(e) => setEditingColumn({ ...editingColumn, content: e.target.value })} placeholder="칼럼 내용을 입력하거나 위 AI 도우미를 활용해보세요" rows={10} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B] resize-none" />
+                    <RichEditor
+                      value={editingColumn.content || ""}
+                      onChange={(html) => setEditingColumn({ ...editingColumn, content: html })}
+                      placeholder="칼럼 내용을 입력하거나 위 AI 도우미를 활용해보세요"
+                    />
                   </div>
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1 block">대표 이미지</label>

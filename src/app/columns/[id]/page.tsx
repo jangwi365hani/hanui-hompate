@@ -53,17 +53,22 @@ export default async function ColumnDetailPage({ params }: { params: Promise<{ i
           />
         )}
 
-        <div className="prose prose-gray max-w-none">
-          {col.content.split("\n").map((para, i) =>
-            para.trim() ? (
-              <p key={i} className="text-gray-700 leading-relaxed text-[15px] mb-4">
-                {para}
-              </p>
-            ) : (
-              <br key={i} />
-            )
-          )}
-        </div>
+        {/<[a-z][\s\S]*>/i.test(col.content) ? (
+          <div
+            className="rich-content text-gray-700 leading-relaxed text-[15px]"
+            dangerouslySetInnerHTML={{ __html: col.content }}
+          />
+        ) : (
+          <div className="text-gray-700 leading-relaxed text-[15px]">
+            {col.content.split("\n").map((para, i) =>
+              para.trim() ? (
+                <p key={i} className="mb-4">{para}</p>
+              ) : (
+                <br key={i} />
+              )
+            )}
+          </div>
+        )}
 
         <div className="mt-10 pt-8 border-t border-gray-100">
           <Link

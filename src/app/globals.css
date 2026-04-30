@@ -24,3 +24,42 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 리치 에디터 - 편집 영역 내부 스타일 */
+.rich-editor h1 { font-size: 1.6em; font-weight: bold; margin-bottom: 0.5em; margin-top: 0.25em; }
+.rich-editor h2 { font-size: 1.35em; font-weight: bold; margin-bottom: 0.4em; margin-top: 0.25em; }
+.rich-editor h3 { font-size: 1.15em; font-weight: 600; margin-bottom: 0.3em; margin-top: 0.25em; }
+.rich-editor p { margin-bottom: 0.5em; }
+.rich-editor ul { list-style-type: disc; padding-left: 1.4em; margin-bottom: 0.5em; }
+.rich-editor ol { list-style-type: decimal; padding-left: 1.4em; margin-bottom: 0.5em; }
+.rich-editor li { margin-bottom: 0.2em; }
+.rich-editor b, .rich-editor strong { font-weight: bold; }
+.rich-editor i, .rich-editor em { font-style: italic; }
+.rich-editor u { text-decoration: underline; }
+.rich-editor s, .rich-editor strike { text-decoration: line-through; }
+/* font 태그 크기 (execCommand fontSize 1~6) */
+.rich-editor font[size="1"] { font-size: 0.65em; }
+.rich-editor font[size="2"] { font-size: 0.8em; }
+.rich-editor font[size="3"] { font-size: 1em; }
+.rich-editor font[size="4"] { font-size: 1.2em; }
+.rich-editor font[size="5"] { font-size: 1.5em; }
+.rich-editor font[size="6"] { font-size: 2em; }
+
+/* 칼럼 본문 표시 영역 스타일 */
+.rich-content h1 { font-size: 1.6em; font-weight: bold; color: #111827; margin-bottom: 0.6em; margin-top: 0.5em; }
+.rich-content h2 { font-size: 1.35em; font-weight: bold; color: #111827; margin-bottom: 0.5em; margin-top: 0.5em; }
+.rich-content h3 { font-size: 1.15em; font-weight: 600; color: #111827; margin-bottom: 0.4em; margin-top: 0.4em; }
+.rich-content p { margin-bottom: 1em; }
+.rich-content ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+.rich-content ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
+.rich-content li { margin-bottom: 0.3em; }
+.rich-content b, .rich-content strong { font-weight: bold; }
+.rich-content i, .rich-content em { font-style: italic; }
+.rich-content u { text-decoration: underline; }
+.rich-content s, .rich-content strike { text-decoration: line-through; }
+.rich-content font[size="1"] { font-size: 0.65em; }
+.rich-content font[size="2"] { font-size: 0.8em; }
+.rich-content font[size="3"] { font-size: 1em; }
+.rich-content font[size="4"] { font-size: 1.2em; }
+.rich-content font[size="5"] { font-size: 1.5em; }
+.rich-content font[size="6"] { font-size: 2em; }
