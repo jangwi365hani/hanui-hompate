@@ -91,7 +91,10 @@ export default function HandoverTab({ pw, loginRole }: { pw: string; loginRole: 
     return d;
   };
 
-  const visibleAccounts = data.accounts.filter((a) => a.role === loginRole);
+  // 원장(doc)은 모든 계정(staff+doc) 열람 가능, 직원(staff)은 staff만
+  const visibleAccounts = loginRole === "doc"
+    ? data.accounts
+    : data.accounts.filter((a) => a.role === "staff");
   const selected = visibleAccounts.find((a) => a.id === selectedId);
   const parts = selected ? (selected.role === "doc" ? DOC_PARTS : STAFF_PARTS) : [];
   const items = selectedId ? (data.items[selectedId] ?? {}) : {};
