@@ -50,11 +50,16 @@ export default function HandoverTab({ pw, loginRole }: { pw: string; loginRole: 
   const itemTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const callApi = async (action: string, extra: Record<string, unknown> = {}) => {
-    await fetch("/api/handover", {
+    const res = await fetch("/api/handover", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: pw, action, ...extra }),
     });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error(err.error || `요청 실패 (${res.status})`);
+    }
+    return res.json();
   };
 
   const fetchData = async () => {
@@ -94,28 +99,37 @@ export default function HandoverTab({ pw, loginRole }: { pw: string; loginRole: 
   const addAccount = async () => {
     if (!newAcc.name.trim()) return;
     setLoading(true);
-    await callApi("add_account", newAcc);
-    const d = await reload();
-    if (d) {
-      const created = d.accounts[d.accounts.length - 1];
-      if (created) { setSelectedId(created.id); setActivePart("__all__"); }
+    try {
+      await callApi("add_account", newAcc);
+      const d = await reload();
+      if (d) {
+        const created = d.accounts[d.accounts.length - 1];
+        if (created) { setSelectedId(created.id); setActivePart("__all__"); }
+      }
+      setShowAdd(false);
+      setNewAcc({ name: "", role: loginRole, since: today() });
+    } catch (e) {
+      alert(`계정 추가 실패: ${(e as Error).message}`);
+    } finally {
+      setLoading(false);
     }
-    setShowAdd(false);
-    setNewAcc({ name: "", role: "staff", since: today() });
-    setLoading(false);
   };
 
   const deleteAccount = async (id: string) => {
     if (!confirm("계정을 삭제하시겠습니까?")) return;
-    await callApi("delete_account", { id });
-    setData((prev) => {
-      const accounts = prev.accounts.filter((a) => a.id !== id);
-      const { [id]: _, ...rest } = prev.items;
-      return { accounts, items: rest };
-    });
-    if (selectedId === id) {
-      const remaining = visibleAccounts.filter((a) => a.id !== id);
-      setSelectedId(remaining[0]?.id ?? null);
+    try {
+      await callApi("delete_account", { id });
+      setData((prev) => {
+        const accounts = prev.accounts.filter((a) => a.id !== id);
+        const { [id]: _, ...rest } = prev.items;
+        return { accounts, items: rest };
+      });
+      if (selectedId === id) {
+        const remaining = visibleAccounts.filter((a) => a.id !== id);
+        setSelectedId(remaining[0]?.id ?? null);
+      }
+    } catch (e) {
+      alert(`계정 삭제 실패: ${(e as Error).message}`);
     }
   };
 
@@ -137,12 +151,12 @@ export default function HandoverTab({ pw, loginRole }: { pw: string; loginRole: 
     });
 
     if (field === "checked") {
-      callApi("update_item", { accountId: selectedId, part, idx, ...newItem });
+      callApi("update_item", { accountId: selectedId, part, idx, ...newItem }).catch((e) => console.error(e));
     } else {
       const key = `${selectedId}-${part}-${idx}`;
       clearTimeout(itemTimers.current[key]);
       itemTimers.current[key] = setTimeout(() => {
-        callApi("update_item", { accountId: selectedId, part, idx, ...newItem });
+        callApi("update_item", { accountId: selectedId, part, idx, ...newItem }).catch((e) => console.error(e));
       }, 600);
     }
   };
@@ -154,20 +168,24 @@ export default function HandoverTab({ pw, loginRole }: { pw: string; loginRole: 
     }));
     clearTimeout(memoTimers.current[id]);
     memoTimers.current[id] = setTimeout(() => {
-      callApi("update_memo", { id, memo });
+      callApi("update_memo", { id, memo }).catch((e) => console.error(e));
     }, 600);
   };
 
   const addItem = async (part: string) => {
     if (!selectedId) return;
-    await callApi("add_item", { accountId: selectedId, part });
-    setData((prev) => {
-      const partArr = [...(prev.items[selectedId]?.[part] ?? []), { memo: "", checked: false, date: "" }];
-      return {
-        ...prev,
-        items: { ...prev.items, [selectedId]: { ...prev.items[selectedId], [part]: partArr } },
-      };
-    });
+    try {
+      await callApi("add_item", { accountId: selectedId, part });
+      setData((prev) => {
+        const partArr = [...(prev.items[selectedId]?.[part] ?? []), { memo: "", checked: false, date: "" }];
+        return {
+          ...prev,
+          items: { ...prev.items, [selectedId]: { ...prev.items[selectedId], [part]: partArr } },
+        };
+      });
+    } catch (e) {
+      alert(`항목 추가 실패: ${(e as Error).message}`);
+    }
   };
 
   const renderPartItems = (part: string, compact = false) => {
