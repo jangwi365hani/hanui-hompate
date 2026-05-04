@@ -1,4 +1,4 @@
-import { put, list, del } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { getWiki } from "@/lib/data";
 import type { WikiArticle } from "@/lib/data";
@@ -9,12 +9,12 @@ const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
 const isValidPassword = (pw: string) => pw === DOCTOR_PASSWORD || pw === STAFF_PASSWORD;
 
 async function saveWiki(articles: WikiArticle[]) {
-  const { blobs } = await list({ prefix: WIKI_PREFIX });
-  if (blobs.length > 0) await del(blobs.map((b) => b.url));
   await put(`${WIKI_PREFIX}.json`, JSON.stringify(articles), {
     access: "public",
     contentType: "application/json",
     cacheControlMaxAge: 0,
+    allowOverwrite: true,
+    addRandomSuffix: false,
   });
 }
 

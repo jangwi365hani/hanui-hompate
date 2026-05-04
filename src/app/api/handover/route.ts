@@ -1,4 +1,4 @@
-import { put, list, del } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import type { HandoverData, HandoverAccount, HandoverItem } from "@/lib/data";
 import { getHandover } from "@/lib/data";
@@ -22,12 +22,12 @@ const DOC_PARTS: Record<string, string[]> = {
 };
 
 async function saveHandover(data: HandoverData) {
-  const { blobs } = await list({ prefix: PREFIX });
-  if (blobs.length > 0) await del(blobs.map((b) => b.url));
   await put(`${PREFIX}.json`, JSON.stringify(data), {
     access: "public",
     contentType: "application/json",
     cacheControlMaxAge: 0,
+    allowOverwrite: true,
+    addRandomSuffix: false,
   });
 }
 

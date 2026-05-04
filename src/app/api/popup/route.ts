@@ -1,4 +1,4 @@
-import { put, list, del } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { getPopup } from "@/lib/data";
 import type { Popup } from "@/lib/data";
@@ -22,12 +22,12 @@ export async function PUT(req: Request) {
   const current = await getPopup();
   const updated: Popup = { ...current, ...popupData };
 
-  const { blobs } = await list({ prefix: POPUP_PREFIX });
-  if (blobs.length > 0) await del(blobs.map((b) => b.url));
   await put(`${POPUP_PREFIX}.json`, JSON.stringify(updated), {
     access: "public",
     contentType: "application/json",
     cacheControlMaxAge: 0,
+    allowOverwrite: true,
+    addRandomSuffix: false,
   });
 
   return NextResponse.json(updated);

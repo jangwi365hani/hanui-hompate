@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env*.local
+
+# 임시 blob 점검 스크립트
+check_blobs.mjs
+dump_blobs.mjs
+dump_handover.mjs

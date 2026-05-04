@@ -1,4 +1,4 @@
-import { put, list, del } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
 const PREFIX      = "hanui-reservation-status";
@@ -27,13 +27,12 @@ export async function POST(req: Request) {
 
     const { secret: _, ...data } = body;
 
-    const { blobs } = await list({ prefix: PREFIX });
-    if (blobs.length > 0) await del(blobs.map((b) => b.url));
-
     await put(`${PREFIX}.json`, JSON.stringify(data), {
       access: "public",
       contentType: "application/json",
       cacheControlMaxAge: 0,
+      allowOverwrite: true,
+      addRandomSuffix: false,
     });
 
     return NextResponse.json({ ok: true });

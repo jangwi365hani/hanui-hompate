@@ -1,4 +1,4 @@
-import { put, list, del } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import type { Event } from "@/lib/data";
 import { getEvents } from "@/lib/data";
@@ -9,12 +9,12 @@ const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
 const isValidPassword = (pw: string) => pw === ADMIN_PASSWORD || pw === STAFF_PASSWORD;
 
 async function saveEvents(events: Event[]) {
-  const { blobs } = await list({ prefix: EVENTS_PREFIX });
-  if (blobs.length > 0) await del(blobs.map((b) => b.url));
   await put(`${EVENTS_PREFIX}.json`, JSON.stringify(events), {
     access: "public",
     contentType: "application/json",
     cacheControlMaxAge: 0,
+    allowOverwrite: true,
+    addRandomSuffix: false,
   });
 }
 
