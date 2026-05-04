@@ -1,4 +1,4 @@
-import { put, list } from "@vercel/blob";
+import { put, list, del } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
 const PREFIX      = "hanui-reservation-status";
@@ -11,7 +11,7 @@ export async function GET() {
     const latest = blobs.sort(
       (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
     )[0];
-    const res  = await fetch(latest.url, { cache: "no-store" });
+    const res  = await fetch(`${latest.url}?v=${new Date(latest.uploadedAt).getTime()}`, { cache: "no-store" });
     const data = await res.json();
     return NextResponse.json(data, { headers: { "Cache-Control": "no-store" } });
   } catch {
@@ -27,13 +27,20 @@ export async function POST(req: Request) {
 
     const { secret: _, ...data } = body;
 
-    await put(`${PREFIX}.json`, JSON.stringify(data), {
+    await put(`${PREFIX}/${Date.now()}.json`, JSON.stringify(data), {
       access: "public",
       contentType: "application/json",
       cacheControlMaxAge: 0,
-      allowOverwrite: true,
       addRandomSuffix: false,
     });
+
+    try {
+      const { blobs } = await list({ prefix: `${PREFIX}/` });
+      const old = blobs
+        .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+        .slice(3);
+      if (old.length) await del(old.map((b) => b.url));
+    } catch {}
 
     return NextResponse.json({ ok: true });
   } catch (e) {

@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { put, list, del } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import type { HandoverData, HandoverAccount, HandoverItem } from "@/lib/data";
 import { getHandover } from "@/lib/data";
@@ -22,13 +22,21 @@ const DOC_PARTS: Record<string, string[]> = {
 };
 
 async function saveHandover(data: HandoverData) {
-  await put(`${PREFIX}.json`, JSON.stringify(data), {
+  // 매번 새 path로 저장 → Vercel CDN cache miss (같은 path overwrite 시 60초 stale 응답 회피)
+  await put(`${PREFIX}/${Date.now()}.json`, JSON.stringify(data), {
     access: "public",
     contentType: "application/json",
     cacheControlMaxAge: 0,
-    allowOverwrite: true,
     addRandomSuffix: false,
   });
+  // 옛 blob 정리 (최근 3개 유지, 실패해도 무방)
+  try {
+    const { blobs } = await list({ prefix: `${PREFIX}/` });
+    const old = blobs
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+      .slice(3);
+    if (old.length) await del(old.map((b) => b.url));
+  } catch {}
 }
 
 export async function GET(req: Request) {

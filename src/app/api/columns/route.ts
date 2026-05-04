@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { put, list, del } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { getColumns } from "@/lib/data";
 import type { Column } from "@/lib/data";
@@ -9,13 +9,19 @@ const STAFF_PASSWORD = process.env.STAFF_PASSWORD || process.env.staff_password 
 const isValidPassword = (pw: string) => pw === ADMIN_PASSWORD || pw === STAFF_PASSWORD;
 
 async function saveColumns(columns: Column[]) {
-  await put(`${COLUMNS_PREFIX}.json`, JSON.stringify(columns), {
+  await put(`${COLUMNS_PREFIX}/${Date.now()}.json`, JSON.stringify(columns), {
     access: "public",
     contentType: "application/json",
     cacheControlMaxAge: 0,
-    allowOverwrite: true,
     addRandomSuffix: false,
   });
+  try {
+    const { blobs } = await list({ prefix: `${COLUMNS_PREFIX}/` });
+    const old = blobs
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())
+      .slice(3);
+    if (old.length) await del(old.map((b) => b.url));
+  } catch {}
 }
 
 export async function GET() {
