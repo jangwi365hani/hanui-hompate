@@ -4,8 +4,8 @@ import type { HandoverData, HandoverAccount, HandoverItem } from "@/lib/data";
 import { getHandover } from "@/lib/data";
 
 const PREFIX = "hanui-handover";
-const DOCTOR_PASSWORD = process.env.ADMIN_PASSWORD || "jw5416200227!";
-const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
+const DOCTOR_PASSWORD = process.env.ADMIN_PASSWORD || process.env.admin_password || "jw5416200227!";
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || process.env.staff_password || "admin1234";
 
 const STAFF_PARTS: Record<string, string[]> = {
   데스크: ["전화 응대", "EMR 접수/수납", "보험 청구", "문진표 관리", "대기실 안내"],

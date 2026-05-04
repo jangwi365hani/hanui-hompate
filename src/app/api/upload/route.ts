@@ -1,8 +1,8 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
-const DOCTOR_PASSWORD = process.env.ADMIN_PASSWORD || "jw5416200227!";
-const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
+const DOCTOR_PASSWORD = process.env.ADMIN_PASSWORD || process.env.admin_password || "jw5416200227!";
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || process.env.staff_password || "admin1234";
 
 export async function POST(request: Request): Promise<Response> {
   const body = (await request.json()) as HandleUploadBody;

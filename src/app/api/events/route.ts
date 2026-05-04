@@ -4,8 +4,8 @@ import type { Event } from "@/lib/data";
 import { getEvents } from "@/lib/data";
 
 const EVENTS_PREFIX = "hanui-events";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "jw5416200227!";
-const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.admin_password || "jw5416200227!";
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || process.env.staff_password || "admin1234";
 const isValidPassword = (pw: string) => pw === ADMIN_PASSWORD || pw === STAFF_PASSWORD;
 
 async function saveEvents(events: Event[]) {

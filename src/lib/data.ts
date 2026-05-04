@@ -25,7 +25,8 @@ async function fetchLatestBlob(prefix: string) {
   const latest = blobs.sort(
     (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
   )[0];
-  const res = await fetch(latest.url, { cache: "no-store" });
+  const bust = new Date(latest.uploadedAt).getTime();
+  const res = await fetch(`${latest.url}?v=${bust}`, { cache: "no-store" });
   return res.json();
 }
 

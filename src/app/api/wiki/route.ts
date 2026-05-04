@@ -4,8 +4,8 @@ import { getWiki } from "@/lib/data";
 import type { WikiArticle } from "@/lib/data";
 
 const WIKI_PREFIX = "hanui-wiki";
-const DOCTOR_PASSWORD = process.env.ADMIN_PASSWORD || "jw5416200227!";
-const STAFF_PASSWORD = process.env.STAFF_PASSWORD || "admin1234";
+const DOCTOR_PASSWORD = process.env.ADMIN_PASSWORD || process.env.admin_password || "jw5416200227!";
+const STAFF_PASSWORD = process.env.STAFF_PASSWORD || process.env.staff_password || "admin1234";
 const isValidPassword = (pw: string) => pw === DOCTOR_PASSWORD || pw === STAFF_PASSWORD;
 
 async function saveWiki(articles: WikiArticle[]) {
