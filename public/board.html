@@ -32,6 +32,22 @@ td.slot-cell.today-col{background:#fafeff;}
 .cell-fill{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:4px 5px;gap:0;}
 .cell-label{font-size:15px;font-weight:700;line-height:1.1;}
 .cell-label.oor{font-size:13px;font-weight:400;color:#ddd;}
+td.slot-cell.clickable{cursor:pointer;transition:filter 0.15s;}
+td.slot-cell.clickable:hover{filter:brightness(0.94);}
+
+/* 원장 선택 모달 */
+.picker-bg{position:fixed;inset:0;background:rgba(0,0,0,0.32);z-index:1000;display:none;align-items:center;justify-content:center;}
+.picker-bg.show{display:flex;}
+.picker-panel{background:#fff;border-radius:14px;padding:22px 22px 18px;width:340px;max-width:92vw;box-shadow:0 8px 32px rgba(0,0,0,0.18);}
+.picker-title{font-size:15px;font-weight:600;color:#111;margin-bottom:6px;}
+.picker-sub{font-size:12px;color:#888;margin-bottom:14px;}
+.picker-doctors{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.picker-btn{padding:12px 8px;border:1px solid #d8d8d8;background:#fafaf8;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;color:#222;transition:background 0.1s,border-color 0.1s;}
+.picker-btn:hover{background:#EAF3DE;border-color:#97C459;color:#3B6D11;}
+.picker-btn.fast{grid-column:1/-1;background:#E6F1FB;border-color:#85B7EB;color:#0C447C;}
+.picker-btn.fast:hover{background:#d0e7fa;}
+.picker-close{margin-top:14px;width:100%;padding:8px;border:none;background:transparent;color:#888;font-size:13px;cursor:pointer;}
+.picker-close:hover{color:#222;}
 </style>
 </head>
 <body>
@@ -51,7 +67,49 @@ td.slot-cell.today-col{background:#fafeff;}
   <div class="wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
 </div>
 
+<!-- 원장 선택 모달 (셀 클릭 시 표시) -->
+<div id="picker-bg" class="picker-bg" onclick="if(event.target.id==='picker-bg')closePicker()">
+  <div class="picker-panel">
+    <div class="picker-title">원장 선택</div>
+    <div class="picker-sub" id="picker-sub"></div>
+    <div class="picker-doctors">
+      <button class="picker-btn" onclick="openNaver('5729528')">김현규 대표원장</button>
+      <button class="picker-btn" onclick="openNaver('6131733')">안익균</button>
+      <button class="picker-btn" onclick="openNaver('6170514')">박종성</button>
+      <button class="picker-btn" onclick="openNaver('7207730')">신지훈</button>
+      <button class="picker-btn" onclick="openNaver('7639099')">김경민</button>
+      <button class="picker-btn fast" onclick="openNaver('5729730')">빠른예약 (자동 배정)</button>
+    </div>
+    <button class="picker-close" onclick="closePicker()">취소</button>
+  </div>
+</div>
+
 <script>
+// 네이버 예약 연결
+const NAVER_BIZ_ID = '567280';
+let pickerCtx = {date:'', hour:0};
+function openPicker(dateStr, hour){
+  pickerCtx = {date: dateStr, hour: hour};
+  const [y,m,d] = dateStr.split('-');
+  document.getElementById('picker-sub').textContent =
+    `${parseInt(m)}/${parseInt(d)} ${String(hour).padStart(2,'0')}:00`;
+  document.getElementById('picker-bg').classList.add('show');
+}
+function closePicker(){
+  document.getElementById('picker-bg').classList.remove('show');
+}
+function openNaver(bizItemId){
+  const {date, hour} = pickerCtx;
+  const hh = String(hour).padStart(2,'0');
+  const startDateTime = `${date}T${hh}:00:00+09:00`;
+  const url = `https://booking.naver.com/booking/13/bizes/${NAVER_BIZ_ID}/items/${bizItemId}`
+            + `?startDate=${date}&startDateTime=${encodeURIComponent(startDateTime)}`;
+  window.open(url, '_blank');
+  closePicker();
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closePicker(); });
+
+
 const STAY=40,SLOT=15,MAX=16,LS=13*60,LE=14*60,MAX_DOC_HOUR=10;
 const DAYS_KO=['일','월','화','수','목','금','토'];
 let DOCTORS=[];
@@ -240,7 +298,11 @@ function render(){
       const docTags=ngDocs.map(doc=>`<span style="display:inline-block;font-size:9px;color:#A32D2D;background:#FCEBEB;border:0.5px solid #F09595;border-radius:6px;padding:1px 5px;margin-top:3px;">${doc} 불가</span>`).join('');
       const tdStyle=bg?`background:${bg};`:'';
       const labelHtml=isOor?`<span class="cell-label oor">—</span>`:`<span class="cell-label" style="color:${fg};">${label}</span>`;
-      tbody+=`<td class="slot-cell${isToday?' today-col':''}" style="${tdStyle}"><div class="cell-fill">${labelHtml}${subHtml}${docTags}</div></td>`;
+      // 클릭 가능: 영업외/마감 제외. 클릭 시 원장 선택 모달 열림
+      const clickable = !isOor && label !== '마감';
+      const clickAttr = clickable ? ` onclick="openPicker('${dk}',${hour})"` : '';
+      const cls = `slot-cell${isToday?' today-col':''}${clickable?' clickable':''}`;
+      tbody+=`<td class="${cls}" style="${tdStyle}"${clickAttr}><div class="cell-fill">${labelHtml}${subHtml}${docTags}</div></td>`;
     }
     tbody+='</tr>';
   }
