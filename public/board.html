@@ -153,6 +153,7 @@ function spectrumStyle(ratio){
 // anyFuture: 과거/휴식이 아닌 슬롯이 하나라도 있는지 (없으면 단순 마감)
 function hourAvail(dateObj,dk,hour){
   let anyAvail=false,maxOcc=0,anyFuture=false,fullSlots=0;
+  const availSlots=[]; // [{sT, peakOcc, remaining}]
   for(let min=0;min<60;min+=SLOT){
     const sM=hour*60+min;
     const sT=m2t(sM);
@@ -164,8 +165,9 @@ function hourAvail(dateObj,dk,hour){
     if(peakOcc>=MAX){fullSlots++;continue;}
     anyAvail=true;
     maxOcc=Math.max(maxOcc,peakOcc);
+    availSlots.push({sT,peakOcc,remaining:MAX-peakOcc});
   }
-  return{avail:anyAvail,maxOcc,anyFuture,fullSlots};
+  return{avail:anyAvail,maxOcc,anyFuture,fullSlots,availSlots};
 }
 
 // 해당 시간대의 모든 슬롯이 영업 시간 밖인지
@@ -211,15 +213,20 @@ function render(){
       const dk=dateKey(d);
       const isToday=d.getTime()===today.getTime();
       let badge;
+      let subText='';
       if(isHourOor(d,hour)){
         badge=`<span class="badge oor">—</span>`;
       } else {
-        const {avail,maxOcc,anyFuture,fullSlots}=hourAvail(d,dk,hour);
+        const {avail,maxOcc,anyFuture,fullSlots,availSlots}=hourAvail(d,dk,hour);
         if(!anyFuture){
           // 모든 슬롯이 과거 또는 휴식
           badge=`<span class="badge full">마감</span>`;
         } else if(fullSlots>=3){
           badge=`<span class="badge" style="background:#FFD0D0;color:#7B0000;border:2px solid #CC2222;">매우혼잡</span>`;
+          // 4슬롯 중 3+ 베드만실 → 보통 1개 슬롯만 남음. 그 시간/자리 안내
+          if(availSlots.length>0){
+            subText=availSlots.map(s=>`${s.sT} ${s.remaining}자리`).join(' · ');
+          }
         } else if(!avail){
           // 미래 슬롯 있지만 베드 전부 찬 상태
           const s=spectrumStyle(1);
@@ -227,15 +234,16 @@ function render(){
         } else {
           const ratio=maxOcc/MAX;
           const s=spectrumStyle(ratio);
-          const txt=ratio>=0.85?'혼잡':ratio>=0.65?'다소혼잡':'가능';
+          const txt=ratio>=0.85?'혼잡':ratio>=0.65?'다소혼잡':ratio>=0.4?'가능':'여유';
           badge=`<span class="badge" style="background:${s.bg};color:${s.fg};border:1.5px solid ${s.bd};">${txt}</span>`;
         }
       }
+      const subHtml=subText?`<div style="font-size:10px;color:#7B0000;font-weight:600;margin-top:2px;white-space:nowrap;">${subText}</div>`:'';
       // 해당 시간대에 한도(10명) 초과한 원장 표시
       const HIDE=new Set(['미지정','data','']);
       const ngDocs=DOCTORS.filter(doc=>!HIDE.has(doc)&&getDocHourCount(dk,hour*60,doc)>=MAX_DOC_HOUR);
       const docTags=ngDocs.map(doc=>`<span style="display:inline-block;font-size:9px;color:#A32D2D;background:#FCEBEB;border:0.5px solid #F09595;border-radius:6px;padding:1px 5px;margin-top:3px;">${doc} 불가</span>`).join('');
-      tbody+=`<td class="slot-cell${isToday?' today-col':''}"><div style="display:flex;flex-direction:column;align-items:center;gap:0;">${badge}${docTags}</div></td>`;
+      tbody+=`<td class="slot-cell${isToday?' today-col':''}"><div style="display:flex;flex-direction:column;align-items:center;gap:0;">${badge}${subHtml}${docTags}</div></td>`;
     }
     tbody+='</tr>';
   }
