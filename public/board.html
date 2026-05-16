@@ -43,9 +43,11 @@ td.slot-cell.clickable:hover{filter:brightness(0.94);}
 .picker-sub{font-size:12px;color:#888;margin-bottom:14px;}
 .picker-doctors{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .picker-btn{padding:12px 8px;border:1px solid #d8d8d8;background:#fafaf8;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600;color:#222;transition:background 0.1s,border-color 0.1s;}
-.picker-btn:hover{background:#EAF3DE;border-color:#97C459;color:#3B6D11;}
+.picker-btn:hover:not(:disabled){background:#EAF3DE;border-color:#97C459;color:#3B6D11;}
+.picker-btn:disabled{background:#f5f4f0;color:#bbb;border-color:#e5e5e5;cursor:not-allowed;text-decoration:line-through;}
+.picker-btn:disabled::after{content:" 근무X";font-size:11px;font-weight:400;}
 .picker-btn.fast{grid-column:1/-1;background:#E6F1FB;border-color:#85B7EB;color:#0C447C;}
-.picker-btn.fast:hover{background:#d0e7fa;}
+.picker-btn.fast:hover:not(:disabled){background:#d0e7fa;}
 .picker-close{margin-top:14px;width:100%;padding:8px;border:none;background:transparent;color:#888;font-size:13px;cursor:pointer;}
 .picker-close:hover{color:#222;}
 </style>
@@ -73,12 +75,12 @@ td.slot-cell.clickable:hover{filter:brightness(0.94);}
     <div class="picker-title">원장 선택</div>
     <div class="picker-sub" id="picker-sub"></div>
     <div class="picker-doctors">
-      <button class="picker-btn" onclick="openNaver('5729528')">김현규 대표원장</button>
-      <button class="picker-btn" onclick="openNaver('6131733')">안익균</button>
-      <button class="picker-btn" onclick="openNaver('6170514')">박종성</button>
-      <button class="picker-btn" onclick="openNaver('7207730')">신지훈</button>
-      <button class="picker-btn" onclick="openNaver('7639099')">김경민</button>
-      <button class="picker-btn fast" onclick="openNaver('5729730')">빠른예약 (자동 배정)</button>
+      <button class="picker-btn" data-biz-id="5729528" onclick="openNaver('5729528')">김현규 대표원장</button>
+      <button class="picker-btn" data-biz-id="6131733" onclick="openNaver('6131733')">안익균</button>
+      <button class="picker-btn" data-biz-id="6170514" onclick="openNaver('6170514')">박종성</button>
+      <button class="picker-btn" data-biz-id="7207730" onclick="openNaver('7207730')">신지훈</button>
+      <button class="picker-btn" data-biz-id="7639099" onclick="openNaver('7639099')">김경민</button>
+      <button class="picker-btn fast" data-biz-id="5729730" onclick="openNaver('5729730')">빠른예약 (자동 배정)</button>
     </div>
     <button class="picker-close" onclick="closePicker()">취소</button>
   </div>
@@ -88,11 +90,38 @@ td.slot-cell.clickable:hover{filter:brightness(0.94);}
 // 네이버 예약 연결
 const NAVER_BIZ_ID = '567280';
 let pickerCtx = {date:'', hour:0};
+let naverSchedule = null;  // {doctors: [{id, name, available: {date: [hours]}}]}
+
+// 페이지 로드 시 네이버 스케줄 fetch (실패해도 보드는 정상 동작)
+async function loadNaverSchedule(){
+  try{
+    const r = await fetch('/api/naver-schedule', {cache: 'no-store'});
+    if(!r.ok) return;
+    naverSchedule = await r.json();
+  }catch(e){ console.warn('naver-schedule load fail', e); }
+}
+loadNaverSchedule();
+
+function doctorWorks(bizItemId, dateStr, hour){
+  // 데이터 미로드 시 일단 활성 (네이버 fetch 실패해도 사용 가능)
+  if(!naverSchedule || !naverSchedule.doctors) return true;
+  // 빠른예약은 항상 활성 (자동 배정)
+  if(bizItemId === '5729730') return true;
+  const d = naverSchedule.doctors.find(x => x.id === bizItemId);
+  if(!d) return true;
+  return (d.available[dateStr] || []).includes(hour);
+}
+
 function openPicker(dateStr, hour){
   pickerCtx = {date: dateStr, hour: hour};
   const [y,m,d] = dateStr.split('-');
   document.getElementById('picker-sub').textContent =
     `${parseInt(m)}/${parseInt(d)} ${String(hour).padStart(2,'0')}:00`;
+  // 원장별 활성/비활성 적용
+  document.querySelectorAll('.picker-btn[data-biz-id]').forEach(btn => {
+    const id = btn.dataset.bizId;
+    btn.disabled = !doctorWorks(id, dateStr, hour);
+  });
   document.getElementById('picker-bg').classList.add('show');
 }
 function closePicker(){
