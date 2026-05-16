@@ -27,13 +27,11 @@ tbody tr:last-child td{border-bottom:none;}
 tbody tr td:last-child{border-right:none;}
 td.time-cell{font-size:15px;font-weight:700;color:#444;padding:0 10px;text-align:right;background:#fafaf8;white-space:nowrap;height:58px;vertical-align:middle;}
 td.lunch-cell{font-size:12px;color:#bbb;text-align:center;padding:10px 4px;background:#f5f4f0;}
-td.slot-cell{padding:7px 5px;text-align:center;height:58px;vertical-align:middle;}
+td.slot-cell{padding:0;text-align:center;height:58px;vertical-align:middle;}
 td.slot-cell.today-col{background:#fafeff;}
-.badge{display:inline-flex;align-items:center;justify-content:center;padding:7px 0;border-radius:22px;font-size:15px;font-weight:700;width:68px;}
-.badge.avail{background:#EAF3DE;color:#3B6D11;border:1.5px solid #97C459;}
-.badge.warn{background:#FAEEDA;color:#854F0B;border:1.5px solid #FAC775;}
-.badge.full{background:#f0efe9;color:#aaa;border:1px solid #ddd;}
-.badge.oor{color:#ddd;font-size:13px;font-weight:400;border:none;background:transparent;}
+.cell-fill{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:4px 5px;gap:0;}
+.cell-label{font-size:15px;font-weight:700;line-height:1.1;}
+.cell-label.oor{font-size:13px;font-weight:400;color:#ddd;}
 </style>
 </head>
 <body>
@@ -212,17 +210,15 @@ function render(){
     for(const d of dates){
       const dk=dateKey(d);
       const isToday=d.getTime()===today.getTime();
-      let badge;
-      let subText='';
+      let bg='',fg='#ddd',label='—',isOor=false,subText='';
       if(isHourOor(d,hour)){
-        badge=`<span class="badge oor">—</span>`;
+        isOor=true;
       } else {
         const {avail,maxOcc,anyFuture,fullSlots,availSlots}=hourAvail(d,dk,hour);
         if(!anyFuture){
-          // 모든 슬롯이 과거 또는 휴식
-          badge=`<span class="badge full">마감</span>`;
+          bg='#f0efe9';fg='#aaa';label='마감';
         } else if(fullSlots>=3){
-          badge=`<span class="badge" style="background:#FFD0D0;color:#7B0000;border:2px solid #CC2222;">매우혼잡</span>`;
+          bg='#FFD0D0';fg='#7B0000';label='매우혼잡';
           // 4슬롯 중 3+ 베드만실 → 보통 1개 슬롯만 남음. 그 시간/자리 안내
           if(availSlots.length>0){
             subText=availSlots.map(s=>`${s.sT} ${s.remaining}자리`).join(' · ');
@@ -230,20 +226,21 @@ function render(){
         } else if(!avail){
           // 미래 슬롯 있지만 베드 전부 찬 상태
           const s=spectrumStyle(1);
-          badge=`<span class="badge" style="background:${s.bg};color:${s.fg};border:1.5px solid ${s.bd};">거의마감</span>`;
+          bg=s.bg;fg=s.fg;label='거의마감';
         } else {
           const ratio=maxOcc/MAX;
           const s=spectrumStyle(ratio);
-          const txt=ratio>=0.85?'혼잡':ratio>=0.65?'다소혼잡':ratio>=0.4?'가능':'여유';
-          badge=`<span class="badge" style="background:${s.bg};color:${s.fg};border:1.5px solid ${s.bd};">${txt}</span>`;
+          bg=s.bg;fg=s.fg;
+          label=ratio>=0.85?'혼잡':ratio>=0.65?'다소혼잡':ratio>=0.4?'가능':'여유';
         }
       }
       const subHtml=subText?`<div style="font-size:10px;color:#7B0000;font-weight:600;margin-top:2px;white-space:nowrap;">${subText}</div>`:'';
-      // 해당 시간대에 한도(10명) 초과한 원장 표시
       const HIDE=new Set(['미지정','data','']);
       const ngDocs=DOCTORS.filter(doc=>!HIDE.has(doc)&&getDocHourCount(dk,hour*60,doc)>=MAX_DOC_HOUR);
       const docTags=ngDocs.map(doc=>`<span style="display:inline-block;font-size:9px;color:#A32D2D;background:#FCEBEB;border:0.5px solid #F09595;border-radius:6px;padding:1px 5px;margin-top:3px;">${doc} 불가</span>`).join('');
-      tbody+=`<td class="slot-cell${isToday?' today-col':''}"><div style="display:flex;flex-direction:column;align-items:center;gap:0;">${badge}${subHtml}${docTags}</div></td>`;
+      const tdStyle=bg?`background:${bg};`:'';
+      const labelHtml=isOor?`<span class="cell-label oor">—</span>`:`<span class="cell-label" style="color:${fg};">${label}</span>`;
+      tbody+=`<td class="slot-cell${isToday?' today-col':''}" style="${tdStyle}"><div class="cell-fill">${labelHtml}${subHtml}${docTags}</div></td>`;
     }
     tbody+='</tr>';
   }
