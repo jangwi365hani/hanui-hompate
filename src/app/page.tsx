@@ -58,8 +58,6 @@ const LOCATION_INFO = [
   { Icon: ParkingCircle, label: "주차",   value: "건물 뒷편 주차타워 이용" },
 ];
 
-const NAVER_BOOKING = "https://m.booking.naver.com/booking/13/bizes/567280?theme=place&service-target=map-pc&lang=ko&area=bmp&map-search=1";
-
 const NaverBadge = () => (
   <span className="inline-flex items-center justify-center w-4 h-4 bg-white text-[#03C75A] rounded-sm text-xs font-black leading-none">N</span>
 );
@@ -88,14 +86,6 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <a
               href="/reservation"
-              className="hidden md:flex items-center gap-1.5 bg-[#8B1A2B] text-white text-sm font-semibold px-4 py-2.5 rounded-full hover:bg-[#7a1626] transition-colors duration-200 shadow-sm"
-            >
-              예약현황
-            </a>
-            <a
-              href={NAVER_BOOKING}
-              target="_blank"
-              rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 bg-[#03C75A] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#02b350] transition-colors duration-200 shadow-sm"
             >
               <NaverBadge /> 네이버 예약
@@ -116,10 +106,7 @@ export default function Home() {
                 {l.label}
               </a>
             ))}
-            <a href="/reservation" className="flex items-center gap-2 text-[#8B1A2B] font-bold">
-              예약현황
-            </a>
-            <a href={NAVER_BOOKING} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#03C75A] font-bold">
+            <a href="/reservation" onClick={() => setMenuOpen(false)} className="flex items-center gap-2 text-[#03C75A] font-bold">
               <NaverBadge /> 네이버 예약
             </a>
           </div>
@@ -145,7 +132,7 @@ export default function Home() {
                 오래 편할 수 있도록, 근본부터 함께 관리합니다.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href={NAVER_BOOKING} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-[#03C75A] hover:bg-[#02b350] text-white font-bold px-10 py-4 rounded-full text-base transition-all duration-200 shadow-lg">
+                <a href="/reservation" className="flex items-center justify-center gap-2 bg-[#03C75A] hover:bg-[#02b350] text-white font-bold px-10 py-4 rounded-full text-base transition-all duration-200 shadow-lg">
                   <NaverBadge /> 네이버 예약하기
                 </a>
                 <a href="#doctors" className="flex items-center justify-center gap-2 border border-white/30 hover:bg-white/10 text-white font-semibold px-10 py-4 rounded-full text-base transition-all duration-200">
@@ -297,7 +284,7 @@ export default function Home() {
             <h3 className="text-2xl font-bold mb-2">건강한 일상, 지금 시작하세요</h3>
             <p className="text-[#f5cdd1] text-sm mb-6">네이버 예약으로 간편하게 예약하실 수 있습니다</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href={NAVER_BOOKING} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 bg-[#03C75A] text-white font-bold px-8 py-3.5 rounded-full hover:bg-[#02b350] transition-colors text-base shadow-md">
+              <a href="/reservation" className="inline-flex items-center justify-center gap-2 bg-[#03C75A] text-white font-bold px-8 py-3.5 rounded-full hover:bg-[#02b350] transition-colors text-base shadow-md">
                 <NaverBadge /> 네이버 예약하기
               </a>
               <a href="tel:02-6952-2800" className="inline-flex items-center justify-center gap-2 bg-white text-[#8B1A2B] font-bold px-8 py-3.5 rounded-full hover:bg-[#fdf3f4] transition-colors text-base shadow-md">
