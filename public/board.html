@@ -8,9 +8,12 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f5f4f0;padding:1.5rem;color:#1a1a1a;}
 .board{max-width:900px;margin:0 auto;}
-.top{margin-bottom:1.25rem;}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:1.25rem;flex-wrap:wrap;}
 .ttl{font-size:20px;font-weight:600;color:#111;}
 .sub{font-size:13px;color:#888;margin-top:4px;}
+.other-date-btn{display:inline-flex;align-items:center;gap:6px;background:#03C75A;color:#fff;border:none;border-radius:999px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.1s;font-family:inherit;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+.other-date-btn:hover{background:#02b350;}
+.other-date-btn .nb{display:inline-flex;width:16px;height:16px;background:#fff;color:#03C75A;border-radius:3px;align-items:center;justify-content:center;font-weight:900;font-size:11px;line-height:1;}
 .legend-row{display:flex;align-items:center;gap:14px;margin-bottom:1rem;flex-wrap:wrap;}
 .leg{display:flex;align-items:center;gap:5px;font-size:12px;color:#888;}
 .leg-dot{width:10px;height:10px;border-radius:50%;}
@@ -55,8 +58,13 @@ td.slot-cell.clickable:hover{filter:brightness(0.94);}
 <body>
 <div class="board">
   <div class="top">
-    <div class="ttl">예약 가능 시간 안내</div>
-    <div class="sub">장위365경희한의원 &nbsp;·&nbsp; <span id="week-range"></span></div>
+    <div>
+      <div class="ttl">예약 가능 시간 안내</div>
+      <div class="sub">장위365경희한의원 &nbsp;·&nbsp; <span id="week-range"></span></div>
+    </div>
+    <button class="other-date-btn" onclick="openPickerAnyDate()" title="이번 주 외 날짜는 네이버에서 직접 선택">
+      <span class="nb">N</span> 다른 날짜 예약
+    </button>
   </div>
   <div class="legend-row">
     <div class="leg">
@@ -124,10 +132,23 @@ function openPicker(dateStr, hour, minute){
   });
   document.getElementById('picker-bg').classList.add('show');
 }
+// 날짜·시간 미지정 모드 — 원장만 고르고 네이버에서 직접 일정 선택
+function openPickerAnyDate(){
+  pickerCtx = {anyDate: true};
+  document.getElementById('picker-sub').textContent = '원장 선택 후 네이버에서 원하는 날짜·시간을 직접 고르세요';
+  document.querySelectorAll('.picker-btn[data-biz-id]').forEach(btn => { btn.disabled = false; });
+  document.getElementById('picker-bg').classList.add('show');
+}
 function closePicker(){
   document.getElementById('picker-bg').classList.remove('show');
 }
 function openNaver(bizItemId){
+  if(pickerCtx.anyDate){
+    const url = `https://booking.naver.com/booking/13/bizes/${NAVER_BIZ_ID}/items/${bizItemId}`;
+    window.open(url, '_blank');
+    closePicker();
+    return;
+  }
   const {date, hour, minute} = pickerCtx;
   const hh = String(hour).padStart(2,'0');
   const mm = String(minute).padStart(2,'0');
