@@ -25,13 +25,13 @@ thead th.weekend-hdr{color:#A32D2D;}
 tbody tr td{border-bottom:0.5px solid #ebebeb;border-right:0.5px solid #ebebeb;}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr td:last-child{border-right:none;}
-td.time-cell{font-size:15px;font-weight:700;color:#444;padding:0 10px;text-align:right;background:#fafaf8;white-space:nowrap;height:58px;vertical-align:middle;}
-td.lunch-cell{font-size:12px;color:#bbb;text-align:center;padding:10px 4px;background:#f5f4f0;}
-td.slot-cell{padding:0;text-align:center;height:58px;vertical-align:middle;}
+td.time-cell{font-size:13px;font-weight:700;color:#444;padding:0 10px;text-align:right;background:#fafaf8;white-space:nowrap;height:38px;vertical-align:middle;}
+td.lunch-cell{font-size:12px;color:#bbb;text-align:center;padding:6px 4px;background:#f5f4f0;}
+td.slot-cell{padding:0;text-align:center;height:38px;vertical-align:middle;}
 td.slot-cell.today-col{background:#fafeff;}
-.cell-fill{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:4px 5px;gap:0;}
-.cell-label{font-size:15px;font-weight:700;line-height:1.1;}
-.cell-label.oor{font-size:13px;font-weight:400;color:#ddd;}
+.cell-fill{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:2px 5px;gap:0;}
+.cell-label{font-size:13px;font-weight:700;line-height:1.1;}
+.cell-label.oor{font-size:12px;font-weight:400;color:#ddd;}
 td.slot-cell.clickable{cursor:pointer;transition:filter 0.15s;}
 td.slot-cell.clickable:hover{filter:brightness(0.94);}
 
@@ -112,12 +112,12 @@ function doctorWorks(bizItemId, dateStr, hour){
   return (d.available[dateStr] || []).includes(hour);
 }
 
-function openPicker(dateStr, hour){
-  pickerCtx = {date: dateStr, hour: hour};
+function openPicker(dateStr, hour, minute){
+  pickerCtx = {date: dateStr, hour: hour, minute: minute};
   const [y,m,d] = dateStr.split('-');
   document.getElementById('picker-sub').textContent =
-    `${parseInt(m)}/${parseInt(d)} ${String(hour).padStart(2,'0')}:00`;
-  // 원장별 활성/비활성 적용
+    `${parseInt(m)}/${parseInt(d)} ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+  // 원장별 활성/비활성 적용 (네이버 스케줄은 시 단위 → 시 기준으로 판정)
   document.querySelectorAll('.picker-btn[data-biz-id]').forEach(btn => {
     const id = btn.dataset.bizId;
     btn.disabled = !doctorWorks(id, dateStr, hour);
@@ -128,9 +128,10 @@ function closePicker(){
   document.getElementById('picker-bg').classList.remove('show');
 }
 function openNaver(bizItemId){
-  const {date, hour} = pickerCtx;
+  const {date, hour, minute} = pickerCtx;
   const hh = String(hour).padStart(2,'0');
-  const startDateTime = `${date}T${hh}:00:00+09:00`;
+  const mm = String(minute).padStart(2,'0');
+  const startDateTime = `${date}T${hh}:${mm}:00+09:00`;
   const url = `https://booking.naver.com/booking/13/bizes/${NAVER_BIZ_ID}/items/${bizItemId}`
             + `?startDate=${date}&startDateTime=${encodeURIComponent(startDateTime)}`;
   window.open(url, '_blank');
@@ -234,13 +235,13 @@ function spectrumStyle(ratio){
   return{bg:rgb(a.bg,b.bg),fg:rgb(a.fg,b.fg),bd:rgb(a.bd,b.bd)};
 }
 
-// 해당 시간(시 단위) 가용성 판단 — {avail, maxOcc, anyFuture} 반환
+// 해당 30분 구간(2 × 15분 슬롯) 가용성 판단 — {avail, maxOcc, anyFuture} 반환
 // anyFuture: 과거/휴식이 아닌 슬롯이 하나라도 있는지 (없으면 단순 마감)
-function hourAvail(dateObj,dk,hour){
+function slotAvail(dateObj,dk,hour,minute){
   let anyAvail=false,maxOcc=0,anyFuture=false,fullSlots=0;
   const availSlots=[]; // [{sT, peakOcc, remaining}]
-  for(let min=0;min<60;min+=SLOT){
-    const sM=hour*60+min;
+  for(let off=0;off<30;off+=SLOT){
+    const sM=hour*60+minute+off;
     const sT=m2t(sM);
     if(sM>=endMin(dateObj))continue;
     if(isClosed(dateObj,sM))continue;
@@ -255,16 +256,16 @@ function hourAvail(dateObj,dk,hour){
   return{avail:anyAvail,maxOcc,anyFuture,fullSlots,availSlots};
 }
 
-// 해당 시간대의 모든 슬롯이 영업 시간 밖인지
-function isHourOor(dateObj,hour){
-  for(let min=0;min<60;min+=SLOT){
-    const sM=hour*60+min;
+// 해당 30분 구간의 모든 슬롯이 영업 시간 밖인지
+function isSlotOor(dateObj,hour,minute){
+  for(let off=0;off<30;off+=SLOT){
+    const sM=hour*60+minute+off;
     if(sM<endMin(dateObj))return false;
   }
   return true;
 }
 
-const HOUR_ROWS=[10,11,12,'lunch',14,15,16,17,18,19,20];
+const HOUR_ROWS=['10:00','10:30','11:00','11:30','12:00','lunch','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30'];
 
 function render(){
   const dates=getWeekDates();
@@ -292,24 +293,23 @@ function render(){
       </tr>`;
       continue;
     }
-    const hour=row;
-    tbody+=`<tr><td class="time-cell">${hour}시</td>`;
+    const [hStr,mStr]=row.split(':');
+    const hour=parseInt(hStr,10), minute=parseInt(mStr,10);
+    tbody+=`<tr><td class="time-cell">${row}</td>`;
     for(const d of dates){
       const dk=dateKey(d);
       const isToday=d.getTime()===today.getTime();
       let bg='',fg='#ddd',label='—',isOor=false,subText='';
-      if(isHourOor(d,hour)){
+      if(isSlotOor(d,hour,minute)){
         isOor=true;
       } else {
-        const {avail,maxOcc,anyFuture,fullSlots,availSlots}=hourAvail(d,dk,hour);
+        const {avail,maxOcc,anyFuture,fullSlots,availSlots}=slotAvail(d,dk,hour,minute);
         if(!anyFuture){
           bg='#f0efe9';fg='#aaa';label='마감';
-        } else if(fullSlots>=3){
+        } else if(fullSlots>=1 && availSlots.length>0){
+          // 30분 2슬롯 중 1개라도 베드만실 → 매우혼잡 + 남은 슬롯/자리 안내
           bg='#FFD0D0';fg='#7B0000';label='매우혼잡';
-          // 4슬롯 중 3+ 베드만실 → 보통 1개 슬롯만 남음. 그 시간/자리 안내
-          if(availSlots.length>0){
-            subText=availSlots.map(s=>`${s.sT} ${s.remaining}자리`).join(' · ');
-          }
+          subText=availSlots.map(s=>`${s.sT} ${s.remaining}자리`).join(' · ');
         } else if(!avail){
           // 미래 슬롯 있지만 베드 전부 찬 상태
           const s=spectrumStyle(1);
@@ -323,13 +323,13 @@ function render(){
       }
       const subHtml=subText?`<div style="font-size:10px;color:#7B0000;font-weight:600;margin-top:2px;white-space:nowrap;">${subText}</div>`:'';
       const HIDE=new Set(['미지정','data','']);
-      const ngDocs=DOCTORS.filter(doc=>!HIDE.has(doc)&&getDocHourCount(dk,hour*60,doc)>=MAX_DOC_HOUR);
+      const ngDocs=DOCTORS.filter(doc=>!HIDE.has(doc)&&getDocHourCount(dk,hour*60+minute,doc)>=MAX_DOC_HOUR);
       const docTags=ngDocs.map(doc=>`<span style="display:inline-block;font-size:9px;color:#A32D2D;background:#FCEBEB;border:0.5px solid #F09595;border-radius:6px;padding:1px 5px;margin-top:3px;">${doc} 불가</span>`).join('');
       const tdStyle=bg?`background:${bg};`:'';
       const labelHtml=isOor?`<span class="cell-label oor">—</span>`:`<span class="cell-label" style="color:${fg};">${label}</span>`;
       // 클릭 가능: 영업외/마감 제외. 클릭 시 원장 선택 모달 열림
       const clickable = !isOor && label !== '마감';
-      const clickAttr = clickable ? ` onclick="openPicker('${dk}',${hour})"` : '';
+      const clickAttr = clickable ? ` onclick="openPicker('${dk}',${hour},${minute})"` : '';
       const cls = `slot-cell${isToday?' today-col':''}${clickable?' clickable':''}`;
       tbody+=`<td class="${cls}" style="${tdStyle}"${clickAttr}><div class="cell-fill">${labelHtml}${subHtml}${docTags}</div></td>`;
     }
