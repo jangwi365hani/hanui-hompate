@@ -46,7 +46,7 @@ export default function AdminPage() {
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState("");
 
-  const [tab, setTab] = useState<"events" | "columns" | "popup" | "handover" | "wiki">("events");
+  const [tab, setTab] = useState<"events" | "columns" | "popup" | "handover" | "wiki" | "holidays">("events");
   const [events, setEvents] = useState<Event[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
   const [editingColumn, setEditingColumn] = useState<Partial<Column> | null>(null);
@@ -58,6 +58,10 @@ export default function AdminPage() {
     linkUrl: "",
     buttonText: "자세히 보기",
   });
+
+  const [holidays, setHolidays] = useState<Record<string, number>>({});
+  const [newHolidayDate, setNewHolidayDate] = useState("");
+  const [newHolidayHour, setNewHolidayHour] = useState(17);
 
   const [editingEvent, setEditingEvent] = useState<Partial<Event> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -92,6 +96,7 @@ export default function AdminPage() {
     if (authed) {
       fetchEvents();
       fetchPopup();
+      fetchHolidays();
       if (loginRole === "doc") fetchColumns();
     }
   }, [authed, loginRole]);
@@ -194,6 +199,57 @@ export default function AdminPage() {
     const res = await fetch("/api/popup");
     const data = await res.json();
     setPopup(data);
+  };
+
+  const fetchHolidays = async () => {
+    const res = await fetch("/api/holidays");
+    const data = await res.json();
+    setHolidays(data || {});
+  };
+
+  const saveHolidays = async (next: Record<string, number>) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/holidays", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw, holidays: next }),
+      });
+      if (res.status === 401) {
+        showMsg("비밀번호가 틀렸습니다.");
+        logout();
+        return;
+      }
+      const saved = await res.json();
+      setHolidays(saved);
+      showMsg("공휴일이 저장되었습니다.");
+    } catch {
+      showMsg("저장 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addHoliday = () => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(newHolidayDate)) {
+      showMsg("날짜 형식이 올바르지 않습니다 (예: 2026-05-25)");
+      return;
+    }
+    if (holidays[newHolidayDate] !== undefined) {
+      showMsg("이미 등록된 날짜입니다");
+      return;
+    }
+    const next = { ...holidays, [newHolidayDate]: newHolidayHour };
+    saveHolidays(next);
+    setNewHolidayDate("");
+    setNewHolidayHour(17);
+  };
+
+  const deleteHoliday = (date: string) => {
+    if (!confirm(`${date} 공휴일을 삭제하시겠습니까?`)) return;
+    const next = { ...holidays };
+    delete next[date];
+    saveHolidays(next);
   };
 
   const showMsg = (text: string) => {
@@ -412,6 +468,16 @@ export default function AdminPage() {
             }`}
           >
             위키
+          </button>
+          <button
+            onClick={() => setTab("holidays")}
+            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+              tab === "holidays"
+                ? "border-[#8B1A2B] text-[#8B1A2B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            공휴일
           </button>
           <a
             href="/"
@@ -891,6 +957,79 @@ export default function AdminPage() {
               >
                 <Save size={16} /> 팝업 설정 저장
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── 공휴일 탭 ── */}
+        {tab === "holidays" && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 mb-2">공휴일 관리</h2>
+            <p className="text-xs text-gray-500 mb-5">
+              등록된 날짜는 예약현황판에서 입력된 시각까지만 진료로 표시됩니다. 등록 안 된 평일은 21시까지, 토·일요일은 17시까지 자동 적용됩니다.
+            </p>
+            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-5">
+              {/* 추가 폼 */}
+              <div className="flex gap-2 items-end p-4 bg-gray-50 rounded-xl">
+                <div className="flex-1">
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">날짜</label>
+                  <input
+                    type="date"
+                    value={newHolidayDate}
+                    onChange={(e) => setNewHolidayDate(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
+                  />
+                </div>
+                <div className="w-28">
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">마감 시각 (시)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={23}
+                    value={newHolidayHour}
+                    onChange={(e) => setNewHolidayHour(Number(e.target.value))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
+                  />
+                </div>
+                <button
+                  onClick={addHoliday}
+                  disabled={loading || !newHolidayDate}
+                  className="flex items-center gap-1 bg-[#8B1A2B] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7a1626] disabled:opacity-50 transition"
+                >
+                  <Plus size={14} /> 추가
+                </button>
+              </div>
+
+              {/* 목록 */}
+              {Object.keys(holidays).length === 0 ? (
+                <p className="text-sm text-gray-400 text-center py-8">등록된 공휴일이 없습니다.</p>
+              ) : (
+                <div className="divide-y divide-gray-100 border border-gray-100 rounded-xl">
+                  {Object.entries(holidays)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([date, hour]) => {
+                      const d = new Date(date + "T00:00:00");
+                      const dayName = ["일", "월", "화", "수", "목", "금", "토"][d.getDay()];
+                      return (
+                        <div key={date} className="flex items-center justify-between px-4 py-3">
+                          <div>
+                            <p className="font-medium text-gray-800">
+                              {date} <span className="text-gray-400">({dayName})</span>
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">{hour}시까지 진료</p>
+                          </div>
+                          <button
+                            onClick={() => deleteHoliday(date)}
+                            disabled={loading}
+                            className="flex items-center gap-1 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg text-sm transition disabled:opacity-50"
+                          >
+                            <Trash2 size={14} /> 삭제
+                          </button>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           </div>
         )}

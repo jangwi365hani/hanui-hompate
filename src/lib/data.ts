@@ -122,3 +122,23 @@ export async function getHandover(): Promise<HandoverData> {
     return def;
   }
 }
+
+export type Holidays = Record<string, number>;
+
+export async function getHolidays(): Promise<Holidays> {
+  const defaults: Holidays = {
+    "2026-05-01": 17,
+    "2026-05-05": 17,
+    "2026-05-25": 17,
+    "2026-06-06": 17,
+    "2026-08-15": 17,
+    "2026-10-03": 17,
+    "2026-10-09": 17,
+  };
+  try {
+    const data = await fetchLatestBlob("hanui-holidays");
+    return data ?? defaults;
+  } catch {
+    return defaults;
+  }
+}
