@@ -171,7 +171,7 @@ function ptWeight(p){const n=p.notice||'';if(n.includes('약상담'))return 3;if
 function t2m(t){const[h,m]=t.split(':').map(Number);return h*60+m;}
 function m2t(m){return`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;}
 function dateKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-const HOLIDAYS={'2026-05-01':17*60,'2026-05-05':17*60,'2026-06-06':17*60,'2026-08-15':17*60,'2026-10-03':17*60,'2026-10-09':17*60};
+const HOLIDAYS={'2026-05-01':17*60,'2026-05-05':17*60,'2026-05-25':17*60,'2026-06-06':17*60,'2026-08-15':17*60,'2026-10-03':17*60,'2026-10-09':17*60};
 function isWeekend(d){const w=d.getDay();return w===0||w===6;}
 function endMin(d){const dk=dateKey(d);if(HOLIDAYS[dk]!==undefined)return HOLIDAYS[dk];return isWeekend(d)?17*60:21*60;}
 function isClosed(d,sM){
