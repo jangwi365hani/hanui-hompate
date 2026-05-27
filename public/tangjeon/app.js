@@ -2115,7 +2115,7 @@ function renderDosingPreview() {
 
   preview.innerHTML = `
     <header class="dosing-paper-head">
-      <img class="dosing-preview-logo" src="./assets/hospital-logo.png" alt="장위365경희한의원" />
+      <img class="dosing-preview-logo" src="/tangjeon/assets/hospital-logo.png" alt="장위365경희한의원" />
       <div class="dosing-paper-title">
         <h3>한약 복용법</h3>
         <p>이 한약은 <strong>${escapeHtml(patient)}님</strong>의 증상을 위한 맞춤 한약입니다.</p>

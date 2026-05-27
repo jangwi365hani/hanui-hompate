@@ -28,13 +28,6 @@ const nextConfig: NextConfig = {
       ],
     };
   },
-  async redirects() {
-    // 기존 /admin 북마크 호환: /admin/* → /system/*
-    return [
-      { source: "/admin", destination: "/system", permanent: true },
-      { source: "/admin/:path*", destination: "/system/:path*", permanent: true },
-    ];
-  },
 };
 
 export default nextConfig;
