@@ -1,26 +1,36 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Keep Existing `/admin` Working (Vercel)
+## Keep Existing `/admin` and `/tangjeon` Working (Vercel)
 
-If your schedule/admin system is already running on another server, keep it there and proxy only the path from this Vercel app.
+If your schedule/admin system and tangjeon system are already running on other servers, keep them there and proxy only the paths from this Vercel app.
 
 Set this environment variable in Vercel:
 
 ```bash
 ADMIN_PROXY_ORIGIN=https://<existing-admin-server-origin>
+TANGJEON_PROXY_ORIGIN=https://<existing-tangjeon-server-origin>
 ```
 
 Then this app will forward:
 
 - `/admin`
 - `/admin/:path*`
+- `/tangjeon`
+- `/tangjeon/:path*`
 
 to:
 
 - `https://<existing-admin-server-origin>/admin`
 - `https://<existing-admin-server-origin>/admin/:path*`
+- `https://<existing-tangjeon-server-origin>/tangjeon`
+- `https://<existing-tangjeon-server-origin>/tangjeon/:path*`
 
 If `ADMIN_PROXY_ORIGIN` is not set, no `/admin` proxy rewrite is applied.
+If `TANGJEON_PROXY_ORIGIN` is not set, no `/tangjeon` proxy rewrite is applied.
+
+Important:
+- Do not set these variables to `https://jangwi365.com` itself, or rewrite loops may happen.
+- Use the real backend origin where each system is currently running.
 
 ## Getting Started
 
