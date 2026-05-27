@@ -1,5 +1,27 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Keep Existing `/admin` Working (Vercel)
+
+If your schedule/admin system is already running on another server, keep it there and proxy only the path from this Vercel app.
+
+Set this environment variable in Vercel:
+
+```bash
+ADMIN_PROXY_ORIGIN=https://<existing-admin-server-origin>
+```
+
+Then this app will forward:
+
+- `/admin`
+- `/admin/:path*`
+
+to:
+
+- `https://<existing-admin-server-origin>/admin`
+- `https://<existing-admin-server-origin>/admin/:path*`
+
+If `ADMIN_PROXY_ORIGIN` is not set, no `/admin` proxy rewrite is applied.
+
 ## Getting Started
 
 First, run the development server:
