@@ -19,8 +19,8 @@ const SYSTEM_TABS: Record<
   schedule: {
     label: "스케줄 시스템",
     description: "직원 스케줄, 근무시간, 인원 관리",
-    iframeSrc: "/system/schedule/login",
-    openHref: "/system/schedule/login",
+    iframeSrc: "/system/schedule",
+    openHref: "/system/schedule",
   },
   tangjeon: {
     label: "탕전 시스템",
