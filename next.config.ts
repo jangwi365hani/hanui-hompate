@@ -32,7 +32,10 @@ const nextConfig: NextConfig = {
           { source: "/system", destination: `${systemProxyOrigin}/admin` },
           { source: "/system/:path*", destination: `${systemProxyOrigin}/admin/:path*` },
         ]
-      : [];
+      : [
+          { source: "/system", destination: "/admin" },
+          { source: "/system/:path*", destination: "/admin/:path*" },
+        ];
 
     return {
       beforeFiles: [

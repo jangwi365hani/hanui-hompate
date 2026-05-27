@@ -43,7 +43,7 @@ to:
 
 If `ADMIN_PROXY_ORIGIN` is not set, no `/admin` proxy rewrite is applied.
 If `TANGJEON_PROXY_ORIGIN` is not set, no `/tangjeon` proxy rewrite is applied.
-If `SYSTEM_PROXY_ORIGIN` (or `SYSTEM_SCHEDULE_PROXY_ORIGIN`) is not set, `/system` is not proxied.
+If `SYSTEM_PROXY_ORIGIN` (or `SYSTEM_SCHEDULE_PROXY_ORIGIN`) is not set, `/system` falls back to internal `/admin`.
 
 Important:
 - Do not set these variables to `https://jangwi365.com` itself, or rewrite loops may happen.
