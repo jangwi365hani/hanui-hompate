@@ -32,12 +32,14 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
-        const user = USERS.find(u => u.name === name) || { name, role: data.role || 'staff' };
-        sessionStorage.setItem('jw_user', JSON.stringify({ name: user.name, role: user.role }));
+      if (res.ok && (data.ok || data.success)) {
+        const serverUser = data.user || {};
+        const localUser = USERS.find(u => u.name === name);
+        const role = serverUser.role || localUser?.role || 'staff';
+        sessionStorage.setItem('jw_user', JSON.stringify({ name, role }));
         router.push('/dashboard');
       } else {
-        setError(data.message || '이름 또는 PIN이 올바르지 않습니다.');
+        setError(data.message || data.error || '이름 또는 PIN이 올바르지 않습니다.');
       }
     } catch {
       setError('서버 연결 오류. 잠시 후 다시 시도하세요.');
