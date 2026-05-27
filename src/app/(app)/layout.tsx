@@ -1,15 +1,12 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import Image from "next/image";
-
-const PROXY = process.env.NEXT_PUBLIC_SYSTEM_PROXY_ORIGIN || "";
+import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "스케줄", icon: "📅", group: "main" },
-  { href: "/tangjeon", label: "탕전", icon: "🫙", group: "main" },
-  { href: "/manage", label: "관리", icon: "⚙️", group: "admin" },
+  { href: '/dashboard', label: '스케줄', icon: '📅', group: 'main' },
+  { href: '/tangjeon', label: '탕전', icon: '🫙', group: 'main' },
+  { href: '/manage', label: '관리', icon: '⚙️', group: 'admin' },
 ];
 
 export default function AppShellLayout({ children }: { children: React.ReactNode }) {
@@ -20,18 +17,24 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem("jw_user");
+    // /login 페이지는 AppShell 인증 체크 없이 그대로 보여줌
+    if (pathname === '/login') {
+      setLoading(false);
+      return;
+    }
+
+    const stored = sessionStorage.getItem('jw_user');
     if (stored) {
       setUser(JSON.parse(stored));
       setLoading(false);
     } else {
-      router.replace("/login");
+      router.replace('/login');
     }
-  }, [router]);
+  }, [router, pathname]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("jw_user");
-    router.replace("/login");
+    sessionStorage.removeItem('jw_user');
+    router.replace('/login');
   };
 
   if (loading) {
@@ -42,71 +45,130 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     );
   }
 
+  // /login 페이지: 사이드바 없이 children만 렌더링
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
+
+  if (!user) return null;
+
   return (
     <div className="flex h-screen bg-[#F5F0EB] font-sans overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`flex flex-col bg-[#2D0A0A] text-white transition-all duration-200 ${
-          sidebarOpen ? "w-56" : "w-14"
-        }`}
+        style={{
+          width: sidebarOpen ? 220 : 64,
+          minWidth: sidebarOpen ? 220 : 64,
+          background: '#2D0A0A',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: 'width 0.2s, min-width 0.2s',
+          overflow: 'hidden',
+          height: '100vh',
+        }}
       >
-        {/* Logo */}
-        <div className="flex items-center gap-2 px-3 py-4 border-b border-[#5a1a1a]">
-          <Image src="/favicon.ico" alt="logo" width={28} height={28} className="rounded-full flex-shrink-0" />
+        {/* Logo/Title */}
+        <div style={{
+          padding: '20px 16px 12px',
+          borderBottom: '1px solid rgba(245,200,66,0.15)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+        }}>
+          <span style={{ fontSize: 22, flexShrink: 0 }}>🏥</span>
           {sidebarOpen && (
-            <span className="text-sm font-bold text-[#F5C842] whitespace-nowrap">장위365 경희</span>
+            <span style={{ color: '#F5C842', fontWeight: 700, fontSize: 13, lineHeight: 1.3, whiteSpace: 'nowrap' }}>
+              장위365<br />경희한의원
+            </span>
           )}
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-3 space-y-1 px-2">
+        {/* Nav Items */}
+        <nav style={{ flex: 1, padding: '12px 8px' }}>
           {NAV_ITEMS.map((item) => {
             const active = pathname.startsWith(item.href);
             return (
-              <a
+              <button
                 key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-2 py-2.5 rounded-lg text-sm transition-colors ${
-                  active
-                    ? "bg-[#8B1A1A] text-white font-semibold"
-                    : "text-gray-300 hover:bg-[#4a1010] hover:text-white"
-                }`}
+                onClick={() => router.push(item.href)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '10px 12px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: active ? 'rgba(245,200,66,0.15)' : 'transparent',
+                  color: active ? '#F5C842' : 'rgba(245,240,235,0.7)',
+                  cursor: 'pointer',
+                  marginBottom: 4,
+                  transition: 'background 0.15s',
+                  fontSize: 14,
+                  textAlign: 'left',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                }}
               >
-                <span className="text-lg flex-shrink-0">{item.icon}</span>
-                {sidebarOpen && <span className="whitespace-nowrap">{item.label}</span>}
-              </a>
+                <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
+                {sidebarOpen && <span style={{ fontWeight: active ? 700 : 400 }}>{item.label}</span>}
+              </button>
             );
           })}
         </nav>
 
         {/* User + Logout */}
-        <div className="border-t border-[#5a1a1a] px-2 py-3 space-y-1">
+        <div style={{
+          padding: '12px 8px 20px',
+          borderTop: '1px solid rgba(245,200,66,0.15)',
+        }}>
           {sidebarOpen && user && (
-            <div className="px-2 py-1 text-xs text-gray-400 truncate">
-              {user.name} · {user.role}
+            <div style={{ color: 'rgba(245,240,235,0.6)', fontSize: 12, padding: '0 12px 8px' }}>
+              {user.name} ({user.role})
             </div>
           )}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-2 py-2 rounded-lg text-sm text-gray-300 hover:bg-[#4a1010] hover:text-white transition-colors"
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+              padding: '10px 12px', borderRadius: 8, border: 'none',
+              background: 'transparent', color: 'rgba(245,240,235,0.5)',
+              cursor: 'pointer', fontSize: 13, whiteSpace: 'nowrap',
+            }}
           >
-            <span className="text-lg flex-shrink-0">🚪</span>
-            {sidebarOpen && <span>로그아웃</span>}
-          </button>
-          <button
-            onClick={() => setSidebarOpen((v) => !v)}
-            className="flex items-center gap-3 w-full px-2 py-2 rounded-lg text-sm text-gray-300 hover:bg-[#4a1010] hover:text-white transition-colors"
-          >
-            <span className="text-lg flex-shrink-0">{sidebarOpen ? "◀" : "▶"}</span>
-            {sidebarOpen && <span>접기</span>}
+            <span style={{ fontSize: 16, flexShrink: 0 }}>🚪</span>
+            {sidebarOpen && '로그아웃'}
           </button>
         </div>
       </aside>
 
+      {/* Toggle button */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        style={{
+          position: 'absolute',
+          left: sidebarOpen ? 208 : 52,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          zIndex: 50,
+          width: 24, height: 24,
+          borderRadius: '50%',
+          border: '1.5px solid #2D0A0A',
+          background: '#fff',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 12, color: '#2D0A0A',
+          transition: 'left 0.2s',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.15)',
+        }}
+      >
+        {sidebarOpen ? '◀' : '▶'}
+      </button>
+
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {children}
       </main>
     </div>
   );
-        }
+}
