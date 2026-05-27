@@ -1,52 +1,49 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Keep Existing `/admin` and `/tangjeon` Working (Vercel)
+## Route Mapping (`/system` and `/tangjeon`)
 
-If your schedule/admin system and tangjeon system are already running on other servers, keep them there and proxy only the paths from this Vercel app.
+If your schedule system and tangjeon system are already running on other servers, proxy only those paths from this Vercel app.
 
 Set this environment variable in Vercel:
 
 ```bash
+# schedule system origin (required for /system)
+SYSTEM_PROXY_ORIGIN=https://<existing-schedule-server-origin>
+
+# optional backward-compatible alias for schedule
+SYSTEM_SCHEDULE_PROXY_ORIGIN=https://<existing-schedule-server-origin>
+
+# existing /admin proxy (kept as-is)
 ADMIN_PROXY_ORIGIN=https://<existing-admin-server-origin>
+
+# tangjeon system origin (required for /tangjeon)
 TANGJEON_PROXY_ORIGIN=https://<existing-tangjeon-server-origin>
-# optional aliases used by /system
-SYSTEM_SCHEDULE_PROXY_ORIGIN=https://<existing-admin-server-origin>
+
+# optional alias for tangjeon
 SYSTEM_TANGJEON_PROXY_ORIGIN=https://<existing-tangjeon-server-origin>
 ```
 
 Then this app will forward:
 
+- `/system`
+- `/system/:path*`
 - `/admin`
 - `/admin/:path*`
 - `/tangjeon`
 - `/tangjeon/:path*`
-- `/system/schedule`
-- `/system/schedule/:path*`
-- `/system/tangjeon`
-- `/system/tangjeon/:path*`
 
 to:
 
+- `https://<existing-schedule-server-origin>/admin`
+- `https://<existing-schedule-server-origin>/admin/:path*`
 - `https://<existing-admin-server-origin>/admin`
 - `https://<existing-admin-server-origin>/admin/:path*`
 - `https://<existing-tangjeon-server-origin>/tangjeon`
 - `https://<existing-tangjeon-server-origin>/tangjeon/:path*`
-- `https://<existing-admin-server-origin>/admin` (for `/system/schedule`)
-- `https://<existing-admin-server-origin>/admin/:path*` (for `/system/schedule/:path*`)
-- `https://<existing-tangjeon-server-origin>/tangjeon` (for `/system/tangjeon`)
-- `https://<existing-tangjeon-server-origin>/tangjeon/:path*` (for `/system/tangjeon/:path*`)
 
 If `ADMIN_PROXY_ORIGIN` is not set, no `/admin` proxy rewrite is applied.
 If `TANGJEON_PROXY_ORIGIN` is not set, no `/tangjeon` proxy rewrite is applied.
-If `SYSTEM_SCHEDULE_PROXY_ORIGIN` is not set, `/system/schedule*` falls back to internal `/admin*`.
-If `SYSTEM_TANGJEON_PROXY_ORIGIN` is not set, `/system/tangjeon*` uses a local setup guide page.
-
-## Unified System UI
-
-- `/system` is a unified launcher UI that switches between:
-  - schedule/admin system
-  - tangjeon system
-- This gives a single entry point without removing existing `/admin` behavior.
+If `SYSTEM_PROXY_ORIGIN` (or `SYSTEM_SCHEDULE_PROXY_ORIGIN`) is not set, `/system` is not proxied.
 
 Important:
 - Do not set these variables to `https://jangwi365.com` itself, or rewrite loops may happen.

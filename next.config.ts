@@ -1,15 +1,15 @@
 import type { NextConfig } from "next";
 
 const adminProxyOrigin = (process.env.ADMIN_PROXY_ORIGIN || "").replace(/\/+$/, "");
-const tangjeonProxyOrigin = (process.env.TANGJEON_PROXY_ORIGIN || "").replace(/\/+$/, "");
-const systemScheduleProxyOrigin = (
-  process.env.SYSTEM_SCHEDULE_PROXY_ORIGIN ||
-  process.env.ADMIN_PROXY_ORIGIN ||
-  ""
-).replace(/\/+$/, "");
-const systemTangjeonProxyOrigin = (
+const tangjeonProxyOrigin = (
   process.env.SYSTEM_TANGJEON_PROXY_ORIGIN ||
   process.env.TANGJEON_PROXY_ORIGIN ||
+  ""
+).replace(/\/+$/, "");
+const systemProxyOrigin = (
+  process.env.SYSTEM_PROXY_ORIGIN ||
+  process.env.SYSTEM_SCHEDULE_PROXY_ORIGIN ||
+  process.env.ADMIN_PROXY_ORIGIN ||
   ""
 ).replace(/\/+$/, "");
 
@@ -27,26 +27,16 @@ const nextConfig: NextConfig = {
           { source: "/tangjeon/:path*", destination: `${tangjeonProxyOrigin}/tangjeon/:path*` },
         ]
       : [];
-    const systemScheduleRewrites = systemScheduleProxyOrigin
+    const systemRewrites = systemProxyOrigin
       ? [
-          { source: "/system/schedule", destination: `${systemScheduleProxyOrigin}/admin` },
-          { source: "/system/schedule/:path*", destination: `${systemScheduleProxyOrigin}/admin/:path*` },
-        ]
-      : [
-          { source: "/system/schedule", destination: "/admin" },
-          { source: "/system/schedule/:path*", destination: "/admin/:path*" },
-        ];
-    const systemTangjeonRewrites = systemTangjeonProxyOrigin
-      ? [
-          { source: "/system/tangjeon", destination: `${systemTangjeonProxyOrigin}/tangjeon` },
-          { source: "/system/tangjeon/:path*", destination: `${systemTangjeonProxyOrigin}/tangjeon/:path*` },
+          { source: "/system", destination: `${systemProxyOrigin}/admin` },
+          { source: "/system/:path*", destination: `${systemProxyOrigin}/admin/:path*` },
         ]
       : [];
 
     return {
       beforeFiles: [
-        ...systemScheduleRewrites,
-        ...systemTangjeonRewrites,
+        ...systemRewrites,
         ...adminRewrites,
         ...tangjeonRewrites,
         { source: "/reservation", destination: "/board.html" },
