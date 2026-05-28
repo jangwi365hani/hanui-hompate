@@ -21,12 +21,16 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         ...systemRewrites,
-        // 탕전시스템은 public/tangjeon 정적 파일을 Vercel이 직접 서빙.
-        // /tangjeon (트레일링 슬래시 없는 경우)도 index.html을 보여주도록 매핑.
-        { source: "/tangjeon", destination: "/tangjeon/index.html" },
         { source: "/reservation", destination: "/board.html" },
       ],
     };
+  },
+  async redirects() {
+    // 탕전시스템은 이제 장위스케줄에 통합되어 /system/tangjeon에서 서빙.
+    return [
+      { source: "/tangjeon", destination: "/system/tangjeon", permanent: false },
+      { source: "/tangjeon/:path*", destination: "/system/tangjeon/:path*", permanent: false },
+    ];
   },
 };
 
