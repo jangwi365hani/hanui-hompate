@@ -97,22 +97,22 @@ export default function Home() {
           <a href="#" className="flex items-center gap-3">
             <Image src="/images/logo.png" alt="장위365경희한의원 로고" width={240} height={80} className="object-contain h-20 w-auto" />
           </a>
-          <nav className="hidden md:flex items-center gap-5 lg:gap-6 text-sm font-medium text-gray-500">
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-sm font-medium text-gray-500">
             {NAV_LINKS.map((l) => (
               <a key={l.href} href={l.href} className="hover:text-[#8B1A2B] transition-colors duration-200 whitespace-nowrap">
                 {l.label}
               </a>
             ))}
           </nav>
-          <div className="flex items-center gap-2 md:ml-6 lg:ml-10">
+          <div className="flex items-center gap-2 lg:ml-8">
             <a
               href="/reservation"
-              className="hidden md:flex items-center gap-2 bg-[#03C75A] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#02b350] transition-colors duration-200 shadow-sm"
+              className="hidden lg:flex items-center gap-2 bg-[#03C75A] text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-[#02b350] transition-colors duration-200 shadow-sm"
             >
               <NaverBadge /> 네이버 예약
             </a>
             <button
-              className="md:hidden p-2 text-gray-600"
+              className="lg:hidden p-2 text-gray-600"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="메뉴"
             >
@@ -121,7 +121,7 @@ export default function Home() {
           </div>
         </div>
         {menuOpen && (
-          <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 flex flex-col gap-4 text-sm font-medium text-gray-600">
+          <div className="lg:hidden bg-white border-t border-gray-100 px-6 py-4 flex flex-col gap-4 text-sm font-medium text-gray-600">
             {NAV_LINKS.map((l) => (
               <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className="hover:text-[#8B1A2B]">
                 {l.label}
