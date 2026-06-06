@@ -7,6 +7,7 @@ import {
   Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X
 } from "lucide-react";
 import PopupBanner from "@/components/PopupBanner";
+import ReviewsSection from "@/components/ReviewsSection";
 
 const NAV_LINKS = [
   { label: "한의원 소개", href: "#about" },
@@ -294,6 +295,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* 환자 후기 */}
+      <ReviewsSection />
 
       {/* 오시는 길 */}
       <section id="location" className="py-28 px-6 bg-white">

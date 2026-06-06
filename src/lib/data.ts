@@ -10,6 +10,25 @@ export interface Event {
   createdAt: string;
 }
 
+export interface Review {
+  id: string;
+  author: string;     // 작성자(닉네임)
+  content: string;    // 후기 내용
+  rating: number;     // 별점 1~5
+  imageUrl: string;   // 캡처 이미지(선택)
+  isActive: boolean;
+  createdAt: string;
+}
+
+export async function getReviews(): Promise<Review[]> {
+  try {
+    const data = await fetchLatestBlob("hanui-reviews");
+    return (data as Review[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export interface Popup {
   isActive: boolean;
   title: string;
