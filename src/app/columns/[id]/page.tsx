@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getColumns } from "@/lib/data";
 import { notFound } from "next/navigation";
+import ColumnView from "./ColumnView";
 
 export default async function ColumnDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -43,7 +44,9 @@ export default async function ColumnDetailPage({ params }: { params: Promise<{ i
               year: "numeric", month: "long", day: "numeric",
             })}
           </span>
+          <span aria-label="조회수">조회 {((col.views || 0) + 1).toLocaleString()}</span>
         </div>
+        <ColumnView id={col.id} />
 
         {col.imageUrl && (
           <img

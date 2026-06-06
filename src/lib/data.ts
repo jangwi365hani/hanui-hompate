@@ -48,6 +48,7 @@ export interface Column {
   category: string;
   isActive: boolean;
   createdAt: string;
+  views?: number;
 }
 
 export async function getColumns(): Promise<Column[]> {

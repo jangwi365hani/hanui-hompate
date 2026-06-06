@@ -4,6 +4,20 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getColumns } from "@/lib/data";
 
+// HTML 본문에서 태그를 제거해 미리보기용 텍스트만 추출
+function toPlain(html: string): string {
+  return (html || "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default async function ColumnsPage() {
   const all = await getColumns();
   const columns = all.filter((c) => c.isActive);
@@ -64,11 +78,13 @@ export default async function ColumnsPage() {
                     {col.title}
                   </h2>
                   <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
-                    {col.content.replace(/\n/g, " ")}
+                    {toPlain(col.content)}
                   </p>
-                  {col.author && (
-                    <p className="text-xs text-gray-400 mt-3">by {col.author}</p>
-                  )}
+                  <p className="text-xs text-gray-400 mt-3">
+                    {col.author && <span>by {col.author}</span>}
+                    {col.author && <span className="mx-1.5">·</span>}
+                    <span>조회 {(col.views || 0).toLocaleString()}</span>
+                  </p>
                 </div>
               </Link>
             ))}

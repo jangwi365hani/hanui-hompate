@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Phone, ChevronLeft } from "lucide-react";
+import { getColumns } from "@/lib/data";
 
 const DOCTORS = [
   {
@@ -92,6 +93,12 @@ export default async function DoctorPage({ params }: { params: Promise<{ slug: s
   const doctor = DOCTORS.find((d) => d.slug === slug);
   if (!doctor) notFound();
 
+  // 이 원장이 작성한 건강 칼럼(작성자명에 원장 이름 포함, 게시중인 것만)
+  const allColumns = await getColumns();
+  const doctorColumns = allColumns
+    .filter((c) => c.isActive && (c.author || "").includes(doctor.name))
+    .slice(0, 6);
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" }}>
       {/* 헤더 */}
@@ -156,6 +163,37 @@ export default async function DoctorPage({ params }: { params: Promise<{ slug: s
             <p key={i} className="text-gray-600 leading-relaxed text-[15px]">{para}</p>
           ))}
         </div>
+
+        {/* 이 원장의 건강 칼럼 */}
+        {doctorColumns.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <span className="w-1 h-5 bg-[#8B1A2B] rounded-full inline-block" />
+              {doctor.name} 원장의 건강 칼럼
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {doctorColumns.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/columns/${c.id}`}
+                  className="flex gap-4 items-center bg-white border border-gray-100 rounded-2xl p-4 hover:border-[#8B1A2B] hover:shadow-sm transition-all"
+                >
+                  {c.imageUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={c.imageUrl} alt="" className="rounded-xl object-cover flex-shrink-0" style={{ width: 72, height: 72 }} />
+                  ) : (
+                    <div className="rounded-xl bg-gray-100 flex-shrink-0" style={{ width: 72, height: 72 }} />
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-800 text-[15px] truncate">{c.title}</p>
+                    {c.category && <p className="text-xs text-[#8B1A2B] font-semibold mt-1">{c.category}</p>}
+                    <p className="text-xs text-gray-400 mt-1">{(c.createdAt || "").slice(0, 10)} · 조회 {(c.views || 0).toLocaleString()}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 다른 의료진 */}
         <div className="mt-16">
