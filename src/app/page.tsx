@@ -12,7 +12,9 @@ import ReviewsSection from "@/components/ReviewsSection";
 const NAV_LINKS = [
   { label: "한의원 소개", href: "#about" },
   { label: "의료진", href: "#doctors" },
+  { label: "증상별 안내", href: "#symptoms" },
   { label: "진료과목", href: "#services" },
+  { label: "둘러보기", href: "#facility" },
   { label: "진료안내", href: "#info" },
   { label: "오시는 길", href: "#location" },
   { label: "이벤트", href: "/events" },
@@ -43,6 +45,24 @@ const SERVICES = [
   { Icon: Baby,         title: "성장 클리닉",           desc: "아이의 성장 발달을 체계적으로 관리합니다. 체질 분석을 바탕으로 성장에 도움이 되는 맞춤 치료를 제공합니다." },
   { Icon: Utensils,     title: "만성 소화불량 클리닉",  desc: "위장 기능 저하, 더부룩함, 식욕 부진 등 소화기 문제를 체질과 생활습관 관점에서 근본적으로 개선합니다." },
   { Icon: Brain,        title: "안면마비·중풍 클리닉",  desc: "안면마비 및 중풍 후유증 치료를 전문으로 합니다. 신경 회복을 촉진하는 침·약침 치료로 기능 회복을 도모합니다." },
+];
+
+// 증상별 안내 — 기존 8개 클리닉을 증상 키워드로 재구성 (카드 클릭 → 진료과목으로 이동)
+const SYMPTOMS = [
+  { Icon: Bone,         title: "허리·목·관절 통증", tags: ["허리디스크", "목디스크", "척추관협착증", "손발 저림"], clinic: "디스크·협착증 클리닉" },
+  { Icon: TrendingDown, title: "체중·체형 고민",     tags: ["체중 증가", "체지방", "요요", "체질 개선"],          clinic: "다이어트 클리닉" },
+  { Icon: Heart,        title: "여성 건강",          tags: ["월경통", "생리불순", "난임", "왕뜸 케어"],           clinic: "여성 클리닉" },
+  { Icon: Wind,         title: "코·호흡기",          tags: ["알레르기 비염", "코막힘", "재채기", "환절기 비염"],  clinic: "비염 클리닉" },
+  { Icon: Sparkles,     title: "만성피로·면역",      tags: ["기력 저하", "만성 피로", "면역력 저하"],             clinic: "항노화 클리닉" },
+  { Icon: Baby,         title: "소아 성장",          tags: ["키 성장", "식욕부진", "성장 발달"],                  clinic: "성장 클리닉" },
+  { Icon: Utensils,     title: "소화기 불편",        tags: ["만성 소화불량", "더부룩함", "식욕부진"],             clinic: "만성 소화불량 클리닉" },
+  { Icon: Brain,        title: "안면마비·중풍",      tags: ["구안와사", "안면마비", "중풍 후유증"],               clinic: "안면마비·중풍 클리닉" },
+];
+
+// 시설 둘러보기 — 정적 사진 (public/images)
+const FACILITY = [
+  { src: "/images/facility-waiting.jpg",   title: "접수 데스크", desc: "편안하게 맞이하는 안내 공간" },
+  { src: "/images/facility-treatment.jpg", title: "치료실",      desc: "프라이버시를 지키는 1:1 커튼 베드" },
 ];
 
 const HOURS = [
@@ -227,8 +247,39 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 증상별 안내 */}
+      <section id="symptoms" className="py-28 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Find Your Care</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">이런 증상, 어디로 가야 할까요?</h2>
+            <p className="text-gray-500 mt-4 max-w-md mx-auto text-sm leading-relaxed">
+              지금 겪고 계신 증상을 선택하시면 맞는 클리닉을 안내해 드립니다.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {SYMPTOMS.map(({ Icon, title, tags, clinic }) => (
+              <a key={title} href="#services" className="group bg-gray-50 rounded-2xl p-7 border border-gray-100 hover:border-[#e8b4bb] hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                <div className="w-12 h-12 bg-[#fdf3f4] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#fae6e8] transition-colors">
+                  <Icon size={22} className="text-[#8B1A2B]" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#8B1A2B] transition-colors">{title}</h3>
+                <div className="flex flex-wrap gap-1.5 mb-5">
+                  {tags.map((t) => (
+                    <span key={t} className="text-[11px] bg-white text-gray-500 px-2 py-0.5 rounded-full border border-gray-100 group-hover:bg-gray-50 transition-colors">{t}</span>
+                  ))}
+                </div>
+                <p className="mt-auto text-xs text-[#8B1A2B] font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+                  {clinic} <ChevronRight size={13} />
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* 진료과목 */}
-      <section id="services" className="py-28 px-6 bg-white">
+      <section id="services" className="py-28 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Services</span>
@@ -239,12 +290,37 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {SERVICES.map(({ Icon, title, desc }) => (
-              <div key={title} className="group bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-[#e8b4bb] hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
+              <div key={title} className="group bg-white rounded-2xl p-8 border border-gray-100 hover:border-[#e8b4bb] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
                 <div className="w-12 h-12 bg-[#fdf3f4] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#fae6e8] transition-colors">
                   <Icon size={22} className="text-[#8B1A2B]" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#8B1A2B] transition-colors">{title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 시설 둘러보기 */}
+      <section id="facility" className="py-28 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Our Space</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">둘러보기</h2>
+            <p className="text-gray-500 mt-4 max-w-md mx-auto text-sm leading-relaxed">
+              편안한 진료를 위한 장위365경희한의원의 공간입니다.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {FACILITY.map((f) => (
+              <div key={f.src} className="group relative rounded-2xl overflow-hidden border border-gray-100 shadow-sm aspect-[4/3]">
+                <Image src={f.src} alt={f.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 50vw" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-6 text-white">
+                  <h3 className="text-xl font-bold">{f.title}</h3>
+                  <p className="text-sm text-white/85 mt-1">{f.desc}</p>
+                </div>
               </div>
             ))}
           </div>
