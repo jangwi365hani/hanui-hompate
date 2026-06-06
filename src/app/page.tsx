@@ -260,18 +260,14 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {SYMPTOMS.map(({ Icon, title, tags, clinic }) => (
               <a key={title} href="#services" className="group bg-gray-50 rounded-2xl p-7 border border-gray-100 hover:border-[#e8b4bb] hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                <div className="w-12 h-12 bg-[#fdf3f4] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#fae6e8] transition-colors">
-                  <Icon size={22} className="text-[#8B1A2B]" />
+                <div className="w-14 h-14 bg-[#fdf3f4] rounded-2xl flex items-center justify-center mb-5 group-hover:bg-[#fae6e8] transition-colors">
+                  <Icon size={26} className="text-[#8B1A2B]" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#8B1A2B] transition-colors">{title}</h3>
-                <div className="flex flex-wrap gap-1.5 mb-5">
-                  {tags.map((t) => (
-                    <span key={t} className="text-[11px] bg-white text-gray-500 px-2 py-0.5 rounded-full border border-gray-100 group-hover:bg-gray-50 transition-colors">{t}</span>
-                  ))}
-                </div>
-                <p className="mt-auto text-xs text-[#8B1A2B] font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
-                  {clinic} <ChevronRight size={13} />
-                </p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2.5 group-hover:text-[#8B1A2B] transition-colors">{title}</h3>
+                <p className="text-[13.5px] text-gray-500 leading-relaxed mb-6">{tags.join(" · ")}</p>
+                <span className="mt-auto self-start inline-flex items-center gap-1.5 text-[13px] font-bold text-[#8B1A2B] bg-[#fdf3f4] rounded-full pl-4 pr-3 py-2 group-hover:bg-[#8B1A2B] group-hover:text-white transition-colors">
+                  {clinic} <ChevronRight size={15} className="transition-transform group-hover:translate-x-0.5" />
+                </span>
               </a>
             ))}
           </div>
