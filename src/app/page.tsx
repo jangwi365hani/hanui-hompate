@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -28,12 +28,22 @@ const STATS = [
   { num: "100%", label: "맞춤 치료" },
 ];
 
-const DOCTORS = [
-  { file: "doctork", name: "김현규", title: "대표원장", slug: "kim",  tags: ["초음파 진단", "통증 치료"] },
-  { file: "doctora", name: "안익균", title: "원장",    slug: "ahn",  tags: ["통증 치료", "비염"] },
-  { file: "doctorp", name: "박종성", title: "원장",    slug: "park", tags: ["종합적 치료", "한약·추나"] },
-  { file: "doctors", name: "신지훈", title: "원장",    slug: "shin", tags: ["스포츠 손상", "재활"] },
-  { file: "doctorm", name: "김경민", title: "원장",    slug: "kimm", tags: ["소통 중심 진료", "맞춤 치료"] },
+interface Doctor {
+  slug: string;
+  name: string;
+  title: string;
+  tags: string[];
+  imageUrl: string;
+  isActive: boolean;
+}
+
+// /api/team 로드 전·실패 시 사용하는 기본 의료진 (관리자에서 수정 가능)
+const DEFAULT_DOCTORS: Doctor[] = [
+  { slug: "kim",  name: "김현규", title: "대표원장", imageUrl: "/images/doctork.png", isActive: true, tags: ["초음파 진단", "통증 치료"] },
+  { slug: "ahn",  name: "안익균", title: "원장",    imageUrl: "/images/doctora.png", isActive: true, tags: ["통증 치료", "비염"] },
+  { slug: "park", name: "박종성", title: "원장",    imageUrl: "/images/doctorp.png", isActive: true, tags: ["종합적 치료", "한약·추나"] },
+  { slug: "shin", name: "신지훈", title: "원장",    imageUrl: "/images/doctors.png", isActive: true, tags: ["스포츠 손상", "재활"] },
+  { slug: "kimm", name: "김경민", title: "원장",    imageUrl: "/images/doctorm.png", isActive: true, tags: ["소통 중심 진료", "맞춤 치료"] },
 ];
 
 const SERVICES = [
@@ -85,6 +95,16 @@ const NaverBadge = () => (
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [doctors, setDoctors] = useState<Doctor[]>(DEFAULT_DOCTORS);
+
+  useEffect(() => {
+    fetch("/api/team")
+      .then((res) => res.json())
+      .then((data: Doctor[]) => {
+        if (Array.isArray(data) && data.length) setDoctors(data);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" }}>
@@ -226,10 +246,11 @@ export default function Home() {
             <p className="text-gray-500 mt-4 text-sm">다양한 임상 경험을 갖춘 4인의 전문 원장이 함께합니다.</p>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
-            {DOCTORS.map((doc) => (
-              <Link key={doc.file} href={`/doctors/${doc.slug}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 hover:border-[#8B1A2B]/30 transition-all duration-300 w-52">
+            {doctors.filter((doc) => doc.isActive).map((doc) => (
+              <Link key={doc.slug} href={`/doctors/${doc.slug}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 hover:border-[#8B1A2B]/30 transition-all duration-300 w-52">
                 <div className="relative h-64 w-full bg-gray-100 overflow-hidden">
-                  <Image src={`/images/${doc.file}.png`} alt={`${doc.name} ${doc.title}`} fill className={`object-cover object-top ${doc.slug === "kimm" ? "scale-[1.2]" : ""}`} />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={doc.imageUrl} alt={`${doc.name} ${doc.title}`} className={`absolute inset-0 w-full h-full object-cover object-top ${doc.slug === "kimm" ? "scale-[1.2]" : ""}`} />
                 </div>
                 <div className="p-5 text-center">
                   <p className="text-xs text-[#a0293a] font-semibold mb-1">{doc.title}</p>

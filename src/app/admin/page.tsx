@@ -37,6 +37,18 @@ interface Popup {
   buttonText: string;
 }
 
+interface Doctor {
+  id: string;
+  slug: string;
+  name: string;
+  title: string;
+  subtitle: string;
+  tags: string[];
+  bio: string[];
+  imageUrl: string;
+  isActive: boolean;
+}
+
 const STORAGE_KEY = "admin-pw";
 
 export default function AdminPage() {
@@ -46,10 +58,15 @@ export default function AdminPage() {
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState("");
 
-  const [tab, setTab] = useState<"events" | "columns" | "popup" | "handover" | "wiki" | "holidays">("events");
+  const [tab, setTab] = useState<"events" | "columns" | "doctors" | "popup" | "handover" | "wiki" | "holidays">("events");
   const [events, setEvents] = useState<Event[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
   const [editingColumn, setEditingColumn] = useState<Partial<Column> | null>(null);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  // 태그/인사말은 폼에서 문자열로 편집하므로 별도 타입으로 보관
+  const [editingDoctor, setEditingDoctor] = useState<
+    (Partial<Omit<Doctor, "tags" | "bio">> & { tags?: string; bio?: string }) | null
+  >(null);
   const [popup, setPopup] = useState<Popup>({
     isActive: false,
     title: "",
@@ -97,6 +114,7 @@ export default function AdminPage() {
       fetchEvents();
       fetchPopup();
       fetchHolidays();
+      fetchDoctors();
       if (loginRole === "doc") fetchColumns();
     }
   }, [authed, loginRole]);
@@ -199,6 +217,89 @@ export default function AdminPage() {
     const res = await fetch("/api/popup");
     const data = await res.json();
     setPopup(data);
+  };
+
+  const fetchDoctors = async () => {
+    const res = await fetch("/api/team");
+    const data = await res.json();
+    setDoctors(Array.isArray(data) ? data : []);
+  };
+
+  // 저장용: 폼의 문자열 tags/bio를 그대로 보내면 서버가 배열로 정규화함
+  const saveDoctor = async () => {
+    if (!editingDoctor?.name) {
+      showMsg("이름을 입력해주세요.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const method = editingDoctor.id ? "PUT" : "POST";
+      const res = await fetch("/api/team", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw, ...editingDoctor }),
+      });
+      if (res.status === 401) {
+        showMsg("비밀번호가 틀렸습니다. 다시 로그인해주세요.");
+        logout();
+        return;
+      }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        showMsg(err.error || "저장 실패");
+        return;
+      }
+      await fetchDoctors();
+      setEditingDoctor(null);
+      showMsg(editingDoctor.id ? "의료진 정보가 수정되었습니다." : "의료진이 등록되었습니다.");
+    } catch {
+      showMsg("저장 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteDoctor = async (id: string) => {
+    if (!confirm("이 의료진을 삭제하시겠습니까?")) return;
+    setLoading(true);
+    try {
+      await fetch("/api/team", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw, id }),
+      });
+      await fetchDoctors();
+      showMsg("삭제되었습니다.");
+    } catch {
+      showMsg("삭제 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleDoctor = async (doc: Doctor) => {
+    setLoading(true);
+    try {
+      await fetch("/api/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw, id: doc.id, isActive: !doc.isActive }),
+      });
+      await fetchDoctors();
+    } catch {
+      showMsg("변경 실패");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 수정 진입: 배열 필드를 폼 편집용 문자열로 변환
+  const startEditDoctor = (doc: Doctor) => {
+    setEditingDoctor({
+      ...doc,
+      tags: (doc.tags || []).join(", "),
+      bio: (doc.bio || []).join("\n\n"),
+    });
   };
 
   const fetchHolidays = async () => {
@@ -426,6 +527,16 @@ export default function AdminPage() {
             }`}
           >
             이벤트 관리
+          </button>
+          <button
+            onClick={() => setTab("doctors")}
+            className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+              tab === "doctors"
+                ? "border-[#8B1A2B] text-[#8B1A2B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            의료진 관리
           </button>
           {loginRole === "doc" && (
             <button
@@ -835,6 +946,244 @@ export default function AdminPage() {
                       </button>
                       <button onClick={() => setEditingColumn(col)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"><Edit2 size={16} /></button>
                       <button onClick={async () => { if (!confirm("칼럼을 삭제하시겠습니까?")) return; setLoading(true); await fetch("/api/columns", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: pw, id: col.id }) }); await fetchColumns(); showMsg("삭제되었습니다."); setLoading(false); }} className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition"><Trash2 size={16} /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── 의료진 탭 ── */}
+        {tab === "doctors" && (
+          <div>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-gray-900">의료진 목록</h2>
+              <button
+                onClick={() =>
+                  setEditingDoctor({
+                    slug: "",
+                    name: "",
+                    title: "원장",
+                    subtitle: "",
+                    tags: "",
+                    bio: "",
+                    imageUrl: "",
+                    isActive: true,
+                  })
+                }
+                className="flex items-center gap-2 bg-[#8B1A2B] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#7a1626] transition"
+              >
+                <Plus size={16} /> 새 의료진
+              </button>
+            </div>
+
+            {/* 의료진 편집 폼 */}
+            {editingDoctor && (
+              <div className="bg-white rounded-2xl border border-[#8B1A2B]/20 p-6 mb-6 shadow-sm">
+                <h3 className="font-bold text-gray-800 mb-4">
+                  {editingDoctor.id ? "의료진 수정" : "새 의료진 등록"}
+                </h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 mb-1 block">이름 *</label>
+                      <input
+                        type="text"
+                        value={editingDoctor.name || ""}
+                        onChange={(e) => setEditingDoctor({ ...editingDoctor, name: e.target.value })}
+                        placeholder="예: 김현규"
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 mb-1 block">직책</label>
+                      <input
+                        type="text"
+                        value={editingDoctor.title || ""}
+                        onChange={(e) => setEditingDoctor({ ...editingDoctor, title: e.target.value })}
+                        placeholder="예: 대표원장 / 원장"
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">
+                      URL 주소 (영문 슬러그)
+                    </label>
+                    <input
+                      type="text"
+                      value={editingDoctor.slug || ""}
+                      onChange={(e) => setEditingDoctor({ ...editingDoctor, slug: e.target.value })}
+                      placeholder="예: kim (비워두면 자동 생성) · /doctors/kim 으로 접속"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">한 줄 소개</label>
+                    <input
+                      type="text"
+                      value={editingDoctor.subtitle || ""}
+                      onChange={(e) => setEditingDoctor({ ...editingDoctor, subtitle: e.target.value })}
+                      placeholder="예: 몸과 마음의 균형을 돌보는 한의학적 가치"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">
+                      전문 분야 태그 (쉼표로 구분)
+                    </label>
+                    <input
+                      type="text"
+                      value={editingDoctor.tags || ""}
+                      onChange={(e) => setEditingDoctor({ ...editingDoctor, tags: e.target.value })}
+                      placeholder="예: 초음파 진단, 통증 치료, 혈액검사 기반 한약"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">프로필 사진</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={editingDoctor.imageUrl || ""}
+                        onChange={(e) => setEditingDoctor({ ...editingDoctor, imageUrl: e.target.value })}
+                        placeholder="이미지 URL 또는 아래 업로드"
+                        className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B]"
+                      />
+                      <label className="flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-200 transition whitespace-nowrap cursor-pointer">
+                        <Upload size={14} /> 업로드
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file)
+                              handleImagePick(file, (url) =>
+                                setEditingDoctor((prev) => ({ ...prev, imageUrl: url }))
+                              );
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {editingDoctor.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={editingDoctor.imageUrl}
+                        alt="미리보기"
+                        className="mt-2 h-40 w-32 object-cover object-top rounded-lg border border-gray-200"
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">
+                      원장 인사말 (문단은 빈 줄로 구분)
+                    </label>
+                    <textarea
+                      value={editingDoctor.bio || ""}
+                      onChange={(e) => setEditingDoctor({ ...editingDoctor, bio: e.target.value })}
+                      placeholder={"안녕하세요. ...\n\n두 번째 문단은 빈 줄을 넣어 구분합니다."}
+                      rows={10}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#8B1A2B] resize-y"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="docActive"
+                      checked={editingDoctor.isActive ?? true}
+                      onChange={(e) => setEditingDoctor({ ...editingDoctor, isActive: e.target.checked })}
+                      className="accent-[#8B1A2B]"
+                    />
+                    <label htmlFor="docActive" className="text-sm text-gray-700">
+                      홈페이지에 노출
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-5">
+                  <button
+                    onClick={saveDoctor}
+                    disabled={loading}
+                    className="flex items-center gap-2 bg-[#8B1A2B] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#7a1626] disabled:opacity-50 transition"
+                  >
+                    <Save size={15} /> {editingDoctor.id ? "수정 저장" : "등록"}
+                  </button>
+                  <button
+                    onClick={() => setEditingDoctor(null)}
+                    className="px-5 py-2 rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition"
+                  >
+                    취소
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 의료진 목록 */}
+            {doctors.length === 0 ? (
+              <div className="text-center py-16 text-gray-400 bg-white rounded-2xl border border-gray-100">
+                <p>등록된 의료진이 없습니다.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {doctors.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className={`bg-white rounded-xl border p-4 flex gap-4 items-start transition ${
+                      doc.isActive ? "border-gray-100" : "border-gray-100 opacity-60"
+                    }`}
+                  >
+                    {doc.imageUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={doc.imageUrl}
+                        alt={doc.name}
+                        className="w-16 h-20 object-cover object-top rounded-lg flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                            doc.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                          }`}
+                        >
+                          {doc.isActive ? "노출중" : "숨김"}
+                        </span>
+                        <span className="text-xs text-gray-400">/doctors/{doc.slug}</span>
+                      </div>
+                      <p className="font-medium text-gray-900 truncate">
+                        {doc.name} <span className="text-[#8B1A2B] text-sm">{doc.title}</span>
+                      </p>
+                      {doc.subtitle && (
+                        <p className="text-xs text-gray-500 truncate mt-0.5">{doc.subtitle}</p>
+                      )}
+                      {doc.tags?.length > 0 && (
+                        <p className="text-xs text-gray-400 truncate mt-0.5">
+                          {doc.tags.join(" · ")}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex gap-1 flex-shrink-0">
+                      <button
+                        onClick={() => toggleDoctor(doc)}
+                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+                        title={doc.isActive ? "숨기기" : "노출하기"}
+                      >
+                        {doc.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                      <button
+                        onClick={() => startEditDoctor(doc)}
+                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => deleteDoctor(doc.id)}
+                        className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
                 ))}
