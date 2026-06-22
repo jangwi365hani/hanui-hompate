@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 // - GET 호출 시 blob 나이가 1시간 이상이면 네이버 GraphQL에서 다시 가져와 저장
 // - board.html 이 클릭 시 원장 비활성화 판단에 사용
 const PREFIX = "hanui-naver-schedule";
-const REFRESH_MS = 60 * 60 * 1000; // 1시간
+const REFRESH_MS = 10 * 60 * 1000; // 10분 (예약 보드 반응성 ↑)
 
 const DOCTORS = [
   { id: "5729528", name: "김현규" },
