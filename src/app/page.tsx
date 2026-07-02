@@ -10,17 +10,18 @@ import {
 import PopupBanner from "@/components/PopupBanner";
 import ReviewsSection from "@/components/ReviewsSection";
 
+// primary=true 만 데스크톱 상단 내비에 노출(혼잡 완화). 나머지는 모바일 메뉴·푸터에서 접근.
 const NAV_LINKS = [
-  { label: "한의원 소개", href: "#about" },
-  { label: "의료진", href: "#doctors" },
-  { label: "증상별 안내", href: "#symptoms" },
-  { label: "진료과목", href: "#services" },
-  { label: "연구·근거", href: "#research" },
-  { label: "둘러보기", href: "#facility" },
-  { label: "진료안내", href: "#info" },
-  { label: "오시는 길", href: "#location" },
-  { label: "이벤트", href: "/events" },
-  { label: "건강칼럼", href: "/columns" },
+  { label: "한의원 소개", href: "#about", primary: true },
+  { label: "의료진", href: "#doctors", primary: true },
+  { label: "증상별 안내", href: "#symptoms", primary: false },
+  { label: "진료과목", href: "#services", primary: true },
+  { label: "연구·근거", href: "#research", primary: true },
+  { label: "둘러보기", href: "#facility", primary: false },
+  { label: "진료안내", href: "#info", primary: false },
+  { label: "오시는 길", href: "#location", primary: true },
+  { label: "이벤트", href: "/events", primary: true },
+  { label: "건강칼럼", href: "/columns", primary: true },
 ];
 
 const STATS = [
@@ -120,7 +121,7 @@ export default function Home() {
             <Image src="/images/logo.png" alt="장위365경희한의원 로고" width={240} height={80} className="object-contain h-20 w-auto" />
           </a>
           <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-sm font-medium text-gray-500">
-            {NAV_LINKS.map((l) => (
+            {NAV_LINKS.filter((l) => l.primary).map((l) => (
               <a key={l.href} href={l.href} className="hover:text-[#8B1A2B] transition-colors duration-200 whitespace-nowrap">
                 {l.label}
               </a>
