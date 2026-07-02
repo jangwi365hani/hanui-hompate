@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Phone, MapPin, Train, Bus, ParkingCircle, Clock, ChevronRight,
   Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X, Home as HomeIcon,
-  FlaskConical, ExternalLink, QrCode, BadgeCheck
+  FlaskConical, ExternalLink, BadgeCheck
 } from "lucide-react";
 import PopupBanner from "@/components/PopupBanner";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -366,16 +366,23 @@ export default function Home() {
                   원문 보기 (Open Access) <ExternalLink size={16} aria-hidden="true" />
                 </a>
               </div>
-              {/* QR 자리 — 위 원문 링크로 생성 예정. 게시 전 수동 생성·삽입 필요 */}
+              {/* 원문 링크 QR — public/images/research-qr.png (원문 URL로 생성). 스캔 시 논문 원문 이동 */}
               <div className="flex md:flex-col items-center justify-center gap-3 md:w-40 shrink-0">
-                <div
-                  className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 bg-white flex items-center justify-center"
-                  role="img"
-                  aria-label="원문 링크 QR 코드 자리 (게시 전 생성 예정)"
+                <a
+                  href="https://www.frontiersin.org/articles/10.3389/fphar.2026.1836840/full"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
                 >
-                  <QrCode size={40} className="text-gray-300" aria-hidden="true" />
-                </div>
-                <span className="text-xs text-gray-400 text-center leading-relaxed">원문 QR<br />(생성 예정)</span>
+                  <Image
+                    src="/images/research-qr.png"
+                    alt="논문 원문(Open Access) 링크 QR 코드"
+                    width={128}
+                    height={128}
+                    className="w-32 h-32 rounded-2xl border border-gray-200 bg-white p-2"
+                  />
+                </a>
+                <span className="text-xs text-gray-500 text-center leading-relaxed">원문 QR<br />(스캔 시 원문 이동)</span>
               </div>
             </div>
           </article>
