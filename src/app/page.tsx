@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { label: "의료진", href: "#doctors" },
   { label: "증상별 안내", href: "#symptoms" },
   { label: "진료과목", href: "#services" },
+  { label: "방문진료", href: "/home-visit" },
   { label: "둘러보기", href: "#facility" },
   { label: "진료안내", href: "#info" },
   { label: "오시는 길", href: "#location" },
