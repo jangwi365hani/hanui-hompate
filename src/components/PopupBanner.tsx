@@ -66,17 +66,36 @@ export default function PopupBanner() {
   if (!visible || popups.length === 0) return null;
 
   const n = popups.length;
-  // 현재 기준 상대 위치(-1, 0, +1 …) — 원형
-  const rel = (i: number) => {
-    let d = i - idx;
-    if (d > n / 2) d -= n;
-    if (d < -n / 2) d += n;
-    return d;
-  };
+  const go = (d: number) => setIdx((i) => (i + d + n) % n);
+  const cur = popups[idx];
+  const prev = popups[(idx - 1 + n) % n];
+  const next = popups[(idx + 1) % n];
+
+  // 양옆 흐릿한 미리보기(peek) — 눌러서 앞으로. 이미지는 살짝 잘려도 되는 티저.
+  const Peek = ({ p, side }: { p: Popup; side: "l" | "r" }) => (
+    <div
+      onClick={() => go(side === "l" ? -1 : 1)}
+      role="button"
+      aria-label={side === "l" ? "이전 팝업" : "다음 팝업"}
+      className={`absolute top-1/2 -translate-y-1/2 z-10 w-52 cursor-pointer opacity-50 blur-[2px] scale-95 transition hover:opacity-70 ${
+        side === "l" ? "right-full mr-[-64px]" : "left-full ml-[-64px]"
+      }`}
+    >
+      <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+        {p.imageUrl ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img src={p.imageUrl} alt="" className="w-full h-44 object-cover" />
+        ) : (
+          <div className="w-full h-44 bg-gray-100" />
+        )}
+        {p.title && <div className="p-3 text-sm font-bold text-gray-800 truncate">{p.title}</div>}
+      </div>
+    </div>
+  );
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm overflow-hidden px-4"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm overflow-hidden px-4 py-8"
       onClick={(e) => {
         if (e.target === e.currentTarget) dismiss();
       }}
@@ -86,68 +105,48 @@ export default function PopupBanner() {
         onMouseEnter={() => (hoverRef.current = true)}
         onMouseLeave={() => (hoverRef.current = false)}
       >
-        {/* 코버플로우 스테이지 */}
-        <div className="relative h-[440px]">
-          {popups.map((p, i) => {
-            const d = rel(i);
-            if (Math.abs(d) > 1) return null; // 현재 + 양옆만
-            const active = d === 0;
-            const style: React.CSSProperties = {
-              transform: `translateX(${d * 56}%) scale(${active ? 1 : 0.82})`,
-              opacity: active ? 1 : 0.5,
-              filter: active ? "none" : "blur(2px)",
-              zIndex: active ? 30 : 20,
-            };
-            return (
-              <div
-                key={i}
-                onClick={() => !active && setIdx(i)}
-                aria-hidden={!active}
-                className={`absolute top-0 left-1/2 -ml-36 w-72 transition-all duration-500 ease-out ${
-                  active ? "" : "cursor-pointer"
-                }`}
-                style={style}
+        {/* 카드 무대: 활성 카드가 흐름에 있어 높이를 결정(이미지 전체 노출), peek은 양옆 절대배치 */}
+        <div className="relative flex justify-center">
+          {n > 1 && <Peek p={prev} side="l" />}
+          {n > 1 && <Peek p={next} side="r" />}
+
+          <div className="relative z-30 w-72 max-h-[80vh] overflow-y-auto rounded-3xl">
+            <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+              <button
+                onClick={dismiss}
+                aria-label="팝업 닫기"
+                className="absolute top-3 right-3 z-10 bg-black/30 text-white rounded-full p-1 hover:bg-black/50 backdrop-blur-sm"
               >
-                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                  {active && (
-                    <button
-                      onClick={dismiss}
-                      aria-label="팝업 닫기"
-                      className="absolute top-3 right-3 z-10 bg-black/30 text-white rounded-full p-1 hover:bg-black/50 backdrop-blur-sm"
-                    >
-                      <X size={18} />
-                    </button>
-                  )}
-                  {p.imageUrl &&
-                    (active && p.linkUrl ? (
-                      <a href={p.linkUrl} target="_blank" rel="noopener noreferrer">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={p.imageUrl} alt={p.title || "팝업 이미지"} className="w-full h-52 object-cover" />
-                      </a>
-                    ) : (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={p.imageUrl} alt={p.title || "팝업 이미지"} className="w-full h-52 object-cover" />
-                    ))}
-                  <div className="p-5">
-                    {p.title && <h2 className="text-lg font-bold text-gray-900 mb-1.5 line-clamp-1">{p.title}</h2>}
-                    {p.content && (
-                      <p className="text-gray-600 text-sm whitespace-pre-line line-clamp-3">{p.content}</p>
-                    )}
-                    {active && p.linkUrl && (
-                      <a
-                        href={p.linkUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-4 block bg-[#8B1A2B] text-white text-sm font-bold py-2.5 rounded-full text-center hover:bg-[#7a1626] transition"
-                      >
-                        {p.buttonText || "자세히 보기"}
-                      </a>
-                    )}
-                  </div>
-                </div>
+                <X size={18} />
+              </button>
+              {cur.imageUrl &&
+                (cur.linkUrl ? (
+                  <a href={cur.linkUrl} target="_blank" rel="noopener noreferrer">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={cur.imageUrl} alt={cur.title || "팝업 이미지"} className="w-full h-auto block" />
+                  </a>
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={cur.imageUrl} alt={cur.title || "팝업 이미지"} className="w-full h-auto block" />
+                ))}
+              <div className="p-5">
+                {cur.title && <h2 className="text-lg font-bold text-gray-900 mb-1.5">{cur.title}</h2>}
+                {cur.content && (
+                  <p className="text-gray-600 text-sm whitespace-pre-line">{cur.content}</p>
+                )}
+                {cur.linkUrl && (
+                  <a
+                    href={cur.linkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 block bg-[#8B1A2B] text-white text-sm font-bold py-2.5 rounded-full text-center hover:bg-[#7a1626] transition"
+                  >
+                    {cur.buttonText || "자세히 보기"}
+                  </a>
+                )}
               </div>
-            );
-          })}
+            </div>
+          </div>
         </div>
 
         {/* 인디케이터 + 오늘 하루 보지 않기 */}
