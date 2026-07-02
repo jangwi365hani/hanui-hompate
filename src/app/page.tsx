@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Phone, MapPin, Train, Bus, ParkingCircle, Clock, ChevronRight,
-  Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X
+  Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X, Home as HomeIcon
 } from "lucide-react";
 import PopupBanner from "@/components/PopupBanner";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -14,7 +14,6 @@ const NAV_LINKS = [
   { label: "의료진", href: "#doctors" },
   { label: "증상별 안내", href: "#symptoms" },
   { label: "진료과목", href: "#services" },
-  { label: "방문진료", href: "/home-visit" },
   { label: "둘러보기", href: "#facility" },
   { label: "진료안내", href: "#info" },
   { label: "오시는 길", href: "#location" },
@@ -471,18 +470,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 카카오 플로팅 버튼 */}
-      <a
-        href="http://pf.kakao.com/_EkrXs"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#FEE500] text-[#3A1D1D] text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#f5dc00] hover:scale-105 transition-all duration-200"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="#3A1D1D">
-          <path d="M12 3C7.03 3 3 6.36 3 10.5c0 2.7 1.7 5.05 4.25 6.4L6.1 21l4.6-2.9c.42.05.86.08 1.3.08 4.97 0 9-3.36 9-7.5S16.97 3 12 3z"/>
-        </svg>
-        카카오 문의
-      </a>
+      {/* 우측 플로팅 버튼 (스크롤 따라 고정) — 방문진료 → 카카오 문의 순 */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        <Link
+          href="/home-visit"
+          className="flex items-center gap-2 bg-[#8B1A2B] text-white text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#a0293a] hover:scale-105 transition-all duration-200"
+        >
+          <HomeIcon size={20} />
+          방문진료
+        </Link>
+        <a
+          href="http://pf.kakao.com/_EkrXs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 bg-[#FEE500] text-[#3A1D1D] text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#f5dc00] hover:scale-105 transition-all duration-200"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#3A1D1D">
+            <path d="M12 3C7.03 3 3 6.36 3 10.5c0 2.7 1.7 5.05 4.25 6.4L6.1 21l4.6-2.9c.42.05.86.08 1.3.08 4.97 0 9-3.36 9-7.5S16.97 3 12 3z"/>
+          </svg>
+          카카오 문의
+        </a>
+      </div>
 
       {/* 푸터 */}
       <footer className="bg-gray-900 text-gray-500 py-12 px-6">
