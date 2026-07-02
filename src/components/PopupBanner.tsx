@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { X } from "lucide-react";
 
 interface Popup {
   isActive: boolean;
@@ -16,9 +16,9 @@ export default function PopupBanner() {
   const [popups, setPopups] = useState<Popup[]>([]);
   const [visible, setVisible] = useState(false);
   const [idx, setIdx] = useState(0);
+  const hoverRef = useRef(false);
 
   useEffect(() => {
-    // 닫기(세션) / 오늘 하루 보지 않기(로컬)는 모든 팝업 공통
     if (sessionStorage.getItem("popup-dismissed")) return;
     const until = localStorage.getItem("popup-dismissed-until");
     if (until && new Date() < new Date(until)) return;
@@ -26,7 +26,6 @@ export default function PopupBanner() {
     fetch("/api/popup")
       .then((r) => r.json())
       .then((data) => {
-        // { popups: [...] } 우선, 레거시 단일 객체/배열도 호환
         const list: Popup[] = Array.isArray(data?.popups)
           ? data.popups
           : Array.isArray(data)
@@ -43,11 +42,19 @@ export default function PopupBanner() {
       .catch(() => {});
   }, []);
 
+  // 자동 회전 (2개 이상, 호버 시 정지)
+  useEffect(() => {
+    if (!visible || popups.length < 2) return;
+    const t = setInterval(() => {
+      if (!hoverRef.current) setIdx((i) => (i + 1) % popups.length);
+    }, 4500);
+    return () => clearInterval(t);
+  }, [visible, popups.length]);
+
   const dismiss = () => {
     sessionStorage.setItem("popup-dismissed", "1");
     setVisible(false);
   };
-
   const dismissToday = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -58,102 +65,108 @@ export default function PopupBanner() {
 
   if (!visible || popups.length === 0) return null;
 
-  const multi = popups.length > 1;
-  const cur = popups[Math.min(idx, popups.length - 1)];
-  const go = (d: number) => setIdx((i) => (i + d + popups.length) % popups.length);
+  const n = popups.length;
+  // 현재 기준 상대 위치(-1, 0, +1 …) — 원형
+  const rel = (i: number) => {
+    let d = i - idx;
+    if (d > n / 2) d -= n;
+    if (d < -n / 2) d += n;
+    return d;
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden">
-        <button
-          onClick={dismiss}
-          aria-label="팝업 닫기"
-          className="absolute top-3 right-3 z-20 bg-white/80 rounded-full p-1 hover:bg-gray-100"
-        >
-          <X size={20} className="text-gray-600" />
-        </button>
+    <div
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm overflow-hidden px-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) dismiss();
+      }}
+    >
+      <div
+        className="relative w-full max-w-md"
+        onMouseEnter={() => (hoverRef.current = true)}
+        onMouseLeave={() => (hoverRef.current = false)}
+      >
+        {/* 코버플로우 스테이지 */}
+        <div className="relative h-[440px]">
+          {popups.map((p, i) => {
+            const d = rel(i);
+            if (Math.abs(d) > 1) return null; // 현재 + 양옆만
+            const active = d === 0;
+            const style: React.CSSProperties = {
+              transform: `translateX(${d * 56}%) scale(${active ? 1 : 0.82})`,
+              opacity: active ? 1 : 0.5,
+              filter: active ? "none" : "blur(2px)",
+              zIndex: active ? 30 : 20,
+            };
+            return (
+              <div
+                key={i}
+                onClick={() => !active && setIdx(i)}
+                aria-hidden={!active}
+                className={`absolute top-0 left-1/2 -ml-36 w-72 transition-all duration-500 ease-out ${
+                  active ? "" : "cursor-pointer"
+                }`}
+                style={style}
+              >
+                <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                  {active && (
+                    <button
+                      onClick={dismiss}
+                      aria-label="팝업 닫기"
+                      className="absolute top-3 right-3 z-10 bg-black/30 text-white rounded-full p-1 hover:bg-black/50 backdrop-blur-sm"
+                    >
+                      <X size={18} />
+                    </button>
+                  )}
+                  {p.imageUrl &&
+                    (active && p.linkUrl ? (
+                      <a href={p.linkUrl} target="_blank" rel="noopener noreferrer">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={p.imageUrl} alt={p.title || "팝업 이미지"} className="w-full h-52 object-cover" />
+                      </a>
+                    ) : (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={p.imageUrl} alt={p.title || "팝업 이미지"} className="w-full h-52 object-cover" />
+                    ))}
+                  <div className="p-5">
+                    {p.title && <h2 className="text-lg font-bold text-gray-900 mb-1.5 line-clamp-1">{p.title}</h2>}
+                    {p.content && (
+                      <p className="text-gray-600 text-sm whitespace-pre-line line-clamp-3">{p.content}</p>
+                    )}
+                    {active && p.linkUrl && (
+                      <a
+                        href={p.linkUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-4 block bg-[#8B1A2B] text-white text-sm font-bold py-2.5 rounded-full text-center hover:bg-[#7a1626] transition"
+                      >
+                        {p.buttonText || "자세히 보기"}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-        {/* 좌·우 이동 (팝업이 여러 개일 때만) */}
-        {multi && (
-          <>
-            <button
-              onClick={() => go(-1)}
-              aria-label="이전 팝업"
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 rounded-full p-1.5 shadow hover:bg-white"
-            >
-              <ChevronLeft size={20} className="text-gray-700" />
-            </button>
-            <button
-              onClick={() => go(1)}
-              aria-label="다음 팝업"
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 rounded-full p-1.5 shadow hover:bg-white"
-            >
-              <ChevronRight size={20} className="text-gray-700" />
-            </button>
-          </>
-        )}
-
-        {cur.imageUrl &&
-          (cur.linkUrl ? (
-            <a href={cur.linkUrl} target="_blank" rel="noopener noreferrer">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cur.imageUrl} alt={cur.title || "팝업 이미지"} className="w-full h-auto block" />
-            </a>
-          ) : (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={cur.imageUrl} alt={cur.title || "팝업 이미지"} className="w-full h-auto block" />
-          ))}
-
-        <div className="p-5">
-          {cur.title && <h2 className="text-xl font-bold text-gray-900 mb-2">{cur.title}</h2>}
-          {cur.content && (
-            <p className="text-gray-600 text-sm whitespace-pre-line mb-4">{cur.content}</p>
-          )}
-
-          {/* 인디케이터 점 */}
-          {multi && (
-            <div className="flex justify-center gap-1.5 mb-4">
+        {/* 인디케이터 + 오늘 하루 보지 않기 */}
+        <div className="mt-5 flex flex-col items-center gap-3">
+          {n > 1 && (
+            <div className="flex gap-2">
               {popups.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setIdx(i)}
                   aria-label={`${i + 1}번째 팝업 보기`}
-                  className={`w-2 h-2 rounded-full transition ${i === idx ? "bg-[#8B1A2B]" : "bg-gray-300"}`}
+                  className={`h-2 rounded-full transition-all ${i === idx ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/80"}`}
                 />
               ))}
             </div>
           )}
-
-          <div className="flex gap-2 items-center">
-            {cur.linkUrl && (
-              <a
-                href={cur.linkUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 bg-[#8B1A2B] text-white text-sm font-medium py-2 rounded-lg text-center hover:bg-[#7a1626] transition"
-              >
-                {cur.buttonText || "자세히 보기"}
-              </a>
-            )}
-            <button
-              onClick={dismissToday}
-              className="text-gray-400 text-xs py-2 px-3 hover:text-gray-600"
-            >
-              오늘 하루 보지 않기
-            </button>
-            <button
-              onClick={dismiss}
-              className="text-gray-400 text-xs py-2 px-3 hover:text-gray-600"
-            >
-              닫기
-            </button>
-          </div>
-
-          {multi && (
-            <p className="text-center text-[11px] text-gray-400 mt-2">
-              {idx + 1} / {popups.length}
-            </p>
-          )}
+          <button onClick={dismissToday} className="text-white/70 text-xs hover:text-white transition-colors">
+            오늘 하루 보지 않기
+          </button>
         </div>
       </div>
     </div>

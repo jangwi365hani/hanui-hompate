@@ -145,22 +145,24 @@ export default function HomeVisitPage() {
           <div>
             <span className="text-sm font-bold text-[#8B1A2B]">COST</span>
             <h2 className="text-3xl font-extrabold mt-2 mb-5">건강보험이 적용됩니다</h2>
-            <p className="text-gray-600 leading-relaxed mb-4">본원은 보건복지부 <b>일차의료 한의 방문진료 수가 시범사업</b> 참여기관으로, 방문진료료에 건강보험이 적용되어 환자는 정해진 <b>본인부담금</b>만 부담합니다.</p>
+            <p className="text-gray-600 leading-relaxed mb-4">본원은 보건복지부 <b>일차의료 한의 방문진료 수가 시범사업</b> 참여기관으로, 방문 1회 진료비는 <b>방문당 단일 수가(포괄수가)</b>입니다. 진찰·침·부항·뜸·한약제제·교통비 등이 모두 포함되어 별도로 추가되지 않습니다.</p>
             <ul className="space-y-3 text-gray-600 text-sm">
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-[#8B1A2B] shrink-0" /> 방문진료 시범수가 기준 본인부담 (건강보험 적용)</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-[#8B1A2B] shrink-0" /> 침·뜸·부항 등 시술료 및 한약은 별도 안내</li>
-              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-[#8B1A2B] shrink-0" /> 정확한 비용은 상담 시 상태에 따라 안내드립니다</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-[#8B1A2B] shrink-0" /> 방문당 정해진 단일 수가 — 진료 시간·내용과 무관하게 동일합니다</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-[#8B1A2B] shrink-0" /> 건강보험 일반 기준 본인부담 30%</li>
+              <li className="flex gap-2"><CheckCircle2 className="w-5 h-5 text-[#8B1A2B] shrink-0" /> 의료급여·차상위·장기요양(와상) 대상자는 부담이 경감됩니다</li>
             </ul>
           </div>
           <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
-            <div className="text-sm text-gray-500 mb-2">방문진료 1회 기준 (예시)</div>
-            <div className="text-4xl font-extrabold text-[#8B1A2B] mb-1">본인부담 소액</div>
-            <p className="text-gray-500 text-sm mb-6">시범사업 수가에 따른 본인부담금 · 실제 금액은 상담 시 확정</p>
+            <div className="text-sm text-gray-500 mb-2">방문 1회 · 건강보험 일반(본인부담 30%)</div>
+            <div className="text-4xl font-extrabold text-[#8B1A2B] mb-1">32,400<span className="text-2xl">원</span></div>
+            <p className="text-gray-500 text-sm mb-6">방문진료료 108,260원(2026년 기준)의 본인부담 30% · 건강보험 적용</p>
             <div className="border-t border-gray-100 pt-5 text-sm text-gray-600 space-y-2">
-              <div className="flex justify-between"><span>방문진료 기본료</span><span className="font-semibold">건강보험 적용</span></div>
-              <div className="flex justify-between"><span>침·뜸·부항 시술</span><span className="font-semibold">항목별 안내</span></div>
-              <div className="flex justify-between"><span>한약 처방</span><span className="font-semibold">별도</span></div>
+              <div className="flex justify-between"><span>건강보험 일반 (30%)</span><span className="font-semibold">32,400원</span></div>
+              <div className="flex justify-between"><span>장기요양 와상 등 (15%)</span><span className="font-semibold">16,200원</span></div>
+              <div className="flex justify-between"><span>의료급여·차상위 (5%)</span><span className="font-semibold">약 5,400원</span></div>
+              <div className="flex justify-between"><span>거동 가능 시 요청 방문</span><span className="font-semibold">108,260원</span></div>
             </div>
+            <p className="text-[11px] text-gray-400 mt-4 leading-relaxed">※ 2026년 수가 기준. 자격·지침에 따라 달라질 수 있어 방문 전 데스크에서 확인해 드립니다.</p>
           </div>
         </div>
       </section>
