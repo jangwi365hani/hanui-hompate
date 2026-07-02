@@ -1,6 +1,6 @@
 import { put, list, del } from "@vercel/blob";
 import { NextResponse } from "next/server";
-import { getPopup } from "@/lib/data";
+import { getPopups } from "@/lib/data";
 import type { Popup } from "@/lib/data";
 
 const POPUP_PREFIX = "hanui-popup";
@@ -9,20 +9,24 @@ const STAFF_PASSWORD = process.env.STAFF_PASSWORD || process.env.staff_password 
 const isValidPassword = (pw: string) => pw === ADMIN_PASSWORD || pw === STAFF_PASSWORD;
 
 export async function GET() {
-  const popup = await getPopup();
-  return NextResponse.json(popup, { headers: { "Cache-Control": "no-store" } });
+  const popups = await getPopups();
+  return NextResponse.json({ popups }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function PUT(req: Request) {
   const body = await req.json();
-  const { password, ...popupData } = body;
+  const { password, popups, ...rest } = body;
   if (!isValidPassword(password))
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const current = await getPopup();
-  const updated: Popup = { ...current, ...popupData };
+  // 배열이 정석. 레거시(단일 객체 body)로 오면 1개짜리 배열로 감싸 데이터 손실 방지.
+  const popupList: Popup[] = Array.isArray(popups)
+    ? popups
+    : rest && (rest.title !== undefined || rest.isActive !== undefined || rest.imageUrl !== undefined)
+    ? [rest as Popup]
+    : [];
 
-  await put(`${POPUP_PREFIX}/${Date.now()}.json`, JSON.stringify(updated), {
+  await put(`${POPUP_PREFIX}/${Date.now()}.json`, JSON.stringify({ popups: popupList }), {
     access: "public",
     contentType: "application/json",
     cacheControlMaxAge: 0,
@@ -37,5 +41,5 @@ export async function PUT(req: Request) {
     if (old.length) await del(old.map((b) => b.url));
   } catch {}
 
-  return NextResponse.json(updated);
+  return NextResponse.json({ popups: popupList });
 }

@@ -67,6 +67,7 @@ export default function AdminPage() {
   const [editingDoctor, setEditingDoctor] = useState<
     (Partial<Omit<Doctor, "tags" | "bio">> & { tags?: string; bio?: string }) | null
   >(null);
+  // 이 관리자는 첫 번째 팝업만 편집(여러 팝업은 /system/homepage-admin에서 관리). 나머지는 보존.
   const [popup, setPopup] = useState<Popup>({
     isActive: false,
     title: "",
@@ -75,6 +76,7 @@ export default function AdminPage() {
     linkUrl: "",
     buttonText: "자세히 보기",
   });
+  const popupRestRef = useRef<Popup[]>([]);
 
   const [holidays, setHolidays] = useState<Record<string, number>>({});
   const [newHolidayDate, setNewHolidayDate] = useState("");
@@ -216,7 +218,11 @@ export default function AdminPage() {
   const fetchPopup = async () => {
     const res = await fetch("/api/popup");
     const data = await res.json();
-    setPopup(data);
+    const list: Popup[] = Array.isArray(data?.popups) ? data.popups : [];
+    popupRestRef.current = list.slice(1);
+    setPopup(
+      list[0] ?? { isActive: false, title: "", content: "", imageUrl: "", linkUrl: "", buttonText: "자세히 보기" }
+    );
   };
 
   const fetchDoctors = async () => {
@@ -451,7 +457,7 @@ export default function AdminPage() {
       const res = await fetch("/api/popup", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: pw, ...popup }),
+        body: JSON.stringify({ password: pw, popups: [popup, ...popupRestRef.current] }),
       });
       if (res.status === 401) {
         showMsg("비밀번호가 틀렸습니다.");

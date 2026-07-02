@@ -96,6 +96,20 @@ export async function getPopup(): Promise<Popup> {
   }
 }
 
+// 다중 팝업 조회. 저장 형식 { popups: Popup[] } 우선, 레거시 단일 객체/배열도 호환.
+export async function getPopups(): Promise<Popup[]> {
+  try {
+    const data = await fetchLatestBlob("hanui-popup");
+    if (!data) return [];
+    if (Array.isArray(data)) return data as Popup[];
+    if (Array.isArray(data.popups)) return data.popups as Popup[];
+    if (typeof data.isActive === "boolean" || data.title || data.imageUrl) return [data as Popup];
+    return [];
+  } catch {
+    return [];
+  }
+}
+
 export interface HandoverAccount {
   id: string;
   name: string;
