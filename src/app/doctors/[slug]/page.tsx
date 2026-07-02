@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Phone, ChevronLeft } from "lucide-react";
+import { Phone, ChevronLeft, BadgeCheck, FileText, ExternalLink } from "lucide-react";
 import { getColumns, getDoctors } from "@/lib/data";
 
 export default async function DoctorPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -60,6 +60,15 @@ export default async function DoctorPage({ params }: { params: Promise<{ slug: s
                 </span>
               ))}
             </div>
+            {/* 연구 논문 공동 저자 뱃지 (김현규 원장) */}
+            {doctor.name === "김현규" && (
+              <div className="flex items-start gap-2 mb-8 bg-[#fdf3f4] border border-[#f5e0e3] rounded-2xl px-4 py-3">
+                <BadgeCheck size={18} className="text-[#8B1A2B] shrink-0 mt-0.5" aria-hidden="true" />
+                <p className="text-sm text-[#8B1A2B] font-semibold leading-snug">
+                  국제 약리학 학술지 Frontiers in Pharmacology(IF 5.4, Q1) 게재 논문 공동 저자
+                </p>
+              </div>
+            )}
             <div className="flex gap-3 flex-wrap">
               <a href="https://m.booking.naver.com/booking/13/bizes/567280?theme=place&service-target=map-pc&lang=ko&area=bmp&map-search=1" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-[#03C75A] text-white font-bold px-8 py-3.5 rounded-full hover:bg-[#02b350] transition-colors shadow-sm">
                 <span className="inline-flex items-center justify-center w-4 h-4 bg-white text-[#03C75A] rounded-sm text-xs font-black leading-none">N</span> 네이버 예약하기
@@ -81,6 +90,33 @@ export default async function DoctorPage({ params }: { params: Promise<{ slug: s
             <p key={i} className="text-gray-600 leading-relaxed text-[15px]">{para}</p>
           ))}
         </div>
+
+        {/* 연구·학술 (김현규 원장) — 원문 링크는 게시 전 수동 확인 필요 */}
+        {doctor.name === "김현규" && (
+          <div className="mt-16">
+            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <span className="w-1 h-5 bg-[#8B1A2B] rounded-full inline-block" />
+              연구·학술
+            </h2>
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-start gap-3">
+              <FileText size={18} className="text-[#8B1A2B] shrink-0 mt-0.5" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-[15px] text-gray-800 font-medium leading-snug">
+                  논문 공저 | Soyeom-Jetong mixture attenuates NLRP3 inflammasome-mediated inflammation, Frontiers in Pharmacology (2026)
+                </p>
+                {/* 원문 링크: 게시 전 수동 확인 필요 */}
+                <a
+                  href="https://www.frontiersin.org/articles/10.3389/fphar.2026.1836840/full"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-[#8B1A2B] font-semibold mt-2 hover:underline"
+                >
+                  원문 보기 (Open Access) <ExternalLink size={14} aria-hidden="true" />
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 이 원장의 건강 칼럼 */}
         {doctorColumns.length > 0 && (

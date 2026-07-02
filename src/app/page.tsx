@@ -4,7 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Phone, MapPin, Train, Bus, ParkingCircle, Clock, ChevronRight,
-  Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X, Home as HomeIcon
+  Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X, Home as HomeIcon,
+  FlaskConical, ExternalLink, QrCode, BadgeCheck
 } from "lucide-react";
 import PopupBanner from "@/components/PopupBanner";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -14,6 +15,7 @@ const NAV_LINKS = [
   { label: "의료진", href: "#doctors" },
   { label: "증상별 안내", href: "#symptoms" },
   { label: "진료과목", href: "#services" },
+  { label: "연구·근거", href: "#research" },
   { label: "둘러보기", href: "#facility" },
   { label: "진료안내", href: "#info" },
   { label: "오시는 길", href: "#location" },
@@ -319,6 +321,72 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 연구·근거 (Research) — 논문 정보/원문 링크는 게시 전 수동 확인 필요 */}
+      <section id="research" className="py-28 px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Research</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">근거를 만드는 진료 — 연구하는 한의원</h2>
+          </div>
+
+          <div className="max-w-3xl mx-auto space-y-5 text-gray-600 leading-relaxed text-[15px] md:text-base">
+            <p>장위365경희한의원은 진료 현장에서 실제로 사용하는 치료법의 작용 원리를 직접 연구하고, 그 결과를 학술의 언어로 검증받는 것을 지향합니다.</p>
+            <p>본원이 임상에서 활용하는 소염제통(消炎除痛) 약침의 항염 작용 기전을 규명한 연구가, 약리학 분야 국제 학술지 Frontiers in Pharmacology(임팩트팩터 5.4, JCR Q1)에 원저 논문으로 게재되었습니다. 본원 원장 김현규가 공동 저자로 참여했습니다.</p>
+            <p>소염제통 약침은 작약·감초·현호색으로 구성되며, 전통적으로 통증과 염증 관리에 사용되어 온 처방에 뿌리를 둡니다. 이번 연구는 이 처방이 NLRP3 인플라마좀이라는 염증 신호 경로를 실험 모델에서 어떻게 조절하는지를 분석한 것으로, 오랜 임상 경험을 현대 약리학으로 이해하려는 시도의 일환입니다.</p>
+          </div>
+
+          {/* 게재 정보 카드 */}
+          <article className="max-w-3xl mx-auto mt-12 bg-gray-50 rounded-3xl border border-gray-100 shadow-sm p-8 md:p-10">
+            <div className="flex flex-col md:flex-row gap-8">
+              {/* 논문 정보 */}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap gap-2 mb-5">
+                  <span className="inline-flex items-center bg-[#8B1A2B] text-white text-xs font-bold px-3 py-1.5 rounded-full">IF 5.4</span>
+                  <span className="inline-flex items-center bg-[#8B1A2B] text-white text-xs font-bold px-3 py-1.5 rounded-full">JCR Q1</span>
+                  <span className="inline-flex items-center gap-1 bg-white text-[#8B1A2B] text-xs font-bold px-3 py-1.5 rounded-full border border-[#e8b4bb]">
+                    <BadgeCheck size={14} aria-hidden="true" /> Open Access
+                  </span>
+                </div>
+                <div className="flex items-start gap-2 mb-4">
+                  <FlaskConical size={20} className="text-[#8B1A2B] shrink-0 mt-0.5" aria-hidden="true" />
+                  <h3 className="text-lg font-bold text-gray-900 leading-snug">Soyeom-Jetong mixture attenuates NLRP3 inflammasome-mediated inflammation</h3>
+                </div>
+                <dl className="text-sm text-gray-600 space-y-1.5 mb-6">
+                  <div className="flex gap-2"><dt className="font-semibold text-gray-800 shrink-0">학술지</dt><dd>Frontiers in Pharmacology (IF 5.4 · JCR Q1)</dd></div>
+                  <div className="flex gap-2"><dt className="font-semibold text-gray-800 shrink-0">게재일</dt><dd>2026. 6. 16</dd></div>
+                  <div className="flex gap-2"><dt className="font-semibold text-gray-800 shrink-0">DOI</dt><dd className="break-all">10.3389/fphar.2026.1836840</dd></div>
+                </dl>
+                {/* 원문 링크: 게시 전 수동 확인 필요 */}
+                <a
+                  href="https://www.frontiersin.org/articles/10.3389/fphar.2026.1836840/full"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-[#8B1A2B] text-white font-bold px-6 py-3 rounded-full hover:bg-[#6e1522] transition-colors shadow-sm text-sm"
+                >
+                  원문 보기 (Open Access) <ExternalLink size={16} aria-hidden="true" />
+                </a>
+              </div>
+              {/* QR 자리 — 위 원문 링크로 생성 예정. 게시 전 수동 생성·삽입 필요 */}
+              <div className="flex md:flex-col items-center justify-center gap-3 md:w-40 shrink-0">
+                <div
+                  className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-300 bg-white flex items-center justify-center"
+                  role="img"
+                  aria-label="원문 링크 QR 코드 자리 (게시 전 생성 예정)"
+                >
+                  <QrCode size={40} className="text-gray-300" aria-hidden="true" />
+                </div>
+                <span className="text-xs text-gray-400 text-center leading-relaxed">원문 QR<br />(생성 예정)</span>
+              </div>
+            </div>
+          </article>
+
+          {/* 하단 각주 (필수 · 삭제 금지) */}
+          <p className="max-w-3xl mx-auto mt-6 text-xs text-gray-500 leading-relaxed">
+            ※ 본 연구는 세포 및 동물(제브라피시) 실험을 통한 전임상 연구이며, 사람에 대한 치료 효과를 입증한 것은 아닙니다. 향후 추가 연구가 필요한 단계입니다.
+          </p>
+        </div>
+      </section>
+
       {/* 시설 둘러보기 */}
       <section id="facility" className="py-28 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
@@ -477,7 +545,7 @@ export default function Home() {
           className="flex items-center gap-2 bg-[#8B1A2B] text-white text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#a0293a] hover:scale-105 transition-all duration-200"
         >
           <HomeIcon size={20} />
-          방문진료
+          방문진료센터
         </Link>
         <a
           href="http://pf.kakao.com/_EkrXs"
