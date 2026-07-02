@@ -118,7 +118,7 @@ export default function Home() {
       <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3">
-            <Image src="/images/logo.png" alt="장위365경희한의원 로고" width={240} height={80} className="object-contain h-20 w-auto" />
+            <Image src="/images/logo.png" alt="장위365경희한의원 로고" width={288} height={96} className="object-contain h-24 w-auto" />
           </a>
           <nav className="hidden lg:flex items-center gap-5 xl:gap-7 text-sm font-medium text-gray-500">
             {NAV_LINKS.filter((l) => l.primary).map((l) => (
