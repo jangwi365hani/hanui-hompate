@@ -16,7 +16,14 @@ export default function PopupBanner() {
   const [popups, setPopups] = useState<Popup[]>([]);
   const [visible, setVisible] = useState(false);
   const [idx, setIdx] = useState(0);
+  const [dir, setDir] = useState(1); // 슬라이드 방향(1=다음, -1=이전)
   const hoverRef = useRef(false);
+
+  // 방향을 정해 부드럽게 이동
+  const goto = (target: number, d?: number) => {
+    setDir(d ?? (target >= idx ? 1 : -1));
+    setIdx(target);
+  };
 
   useEffect(() => {
     if (sessionStorage.getItem("popup-dismissed")) return;
@@ -46,7 +53,10 @@ export default function PopupBanner() {
   useEffect(() => {
     if (!visible || popups.length < 2) return;
     const t = setInterval(() => {
-      if (!hoverRef.current) setIdx((i) => (i + 1) % popups.length);
+      if (!hoverRef.current) {
+        setDir(1);
+        setIdx((i) => (i + 1) % popups.length);
+      }
     }, 4500);
     return () => clearInterval(t);
   }, [visible, popups.length]);
@@ -66,7 +76,10 @@ export default function PopupBanner() {
   if (!visible || popups.length === 0) return null;
 
   const n = popups.length;
-  const go = (d: number) => setIdx((i) => (i + d + n) % n);
+  const go = (d: number) => {
+    setDir(d >= 0 ? 1 : -1);
+    setIdx((i) => (i + d + n) % n);
+  };
   const cur = popups[idx];
   const prev = popups[(idx - 1 + n) % n];
   const next = popups[(idx + 1) % n];
@@ -110,7 +123,11 @@ export default function PopupBanner() {
           {n > 1 && <Peek p={prev} side="l" />}
           {n > 1 && <Peek p={next} side="r" />}
 
-          <div className="relative z-30 w-72 max-h-[80vh] overflow-y-auto rounded-3xl">
+          <div
+            key={idx}
+            className="relative z-30 w-72 max-h-[80vh] overflow-y-auto rounded-3xl"
+            style={{ animation: `${dir >= 0 ? "popupSlideInR" : "popupSlideInL"} 0.4s cubic-bezier(0.22,0.61,0.36,1)` }}
+          >
             <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
               <button
                 onClick={dismiss}
@@ -156,7 +173,7 @@ export default function PopupBanner() {
               {popups.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => setIdx(i)}
+                  onClick={() => goto(i)}
                   aria-label={`${i + 1}번째 팝업 보기`}
                   className={`h-2 rounded-full transition-all ${i === idx ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/80"}`}
                 />
