@@ -173,11 +173,15 @@ export default function HomeVisitPage() {
       {/* 진료 지역 */}
       <section id="area" className="max-w-6xl mx-auto px-5 py-20">
         <div className="grid md:grid-cols-2 gap-10 items-center">
-          <div className="rounded-3xl overflow-hidden border border-gray-100 shadow-sm aspect-[4/3] bg-gray-100 flex items-center justify-center text-gray-400">
-            <div className="text-center">
-              <MapPin className="w-12 h-12 mx-auto mb-3" />
-              <p className="font-semibold">지도 영역 (성북구 장위동 중심)</p>
-            </div>
+          <div className="rounded-3xl overflow-hidden border border-gray-100 shadow-sm aspect-[4/3]">
+            <iframe
+              title="장위365경희한의원 방문진료 지역 (성북구 장위동)"
+              src="https://maps.google.com/maps?q=%EC%84%9C%EC%9A%B8%20%EC%84%B1%EB%B6%81%EA%B5%AC%20%EC%9E%A5%EC%9B%94%EB%A1%9C38%EA%B8%B8%204&z=15&hl=ko&output=embed"
+              className="w-full h-full border-0"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
+            />
           </div>
           <div>
             <span className="text-sm font-bold text-[#8B1A2B]">AREA</span>
