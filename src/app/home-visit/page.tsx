@@ -36,7 +36,7 @@ const CARES = [
 
 const STEPS = [
   { n: 1, title: "전화 상담·신청", desc: "환자 상태와 주소를 확인하고 방문 가능 여부를 안내드립니다" },
-  { n: 2, title: "방문 일정 조율", desc: "보호자와 협의하여 방문 날짜·시간을 예약합니다" },
+  { n: 2, title: "방문 일정 조율", desc: "보호자와 협의하여 방문 날짜를 조율합니다 (정확한 시간 지정은 어렵습니다)" },
   { n: 3, title: "가정 방문 진료", desc: "한의사가 직접 방문해 진찰과 침·뜸 처치를 진행합니다" },
   { n: 4, title: "지속 관리", desc: "경과에 따라 정기 방문 및 복약·재활 관리를 이어갑니다" },
 ];
@@ -137,6 +137,9 @@ export default function HomeVisitPage() {
             </div>
           ))}
         </div>
+        <p className="mt-8 text-center text-sm text-gray-600 bg-[#fdf3f4] border border-[#f5cdd1] rounded-2xl px-6 py-4 max-w-3xl mx-auto leading-relaxed">
+          ※ 방문 진료 특성상 <b className="text-[#8B1A2B]">정확한 방문 시간 지정은 어렵습니다.</b> 당일 진료·이동 상황에 따라 일정을 조율한 뒤 방문해 드리며, 방문 전 미리 연락드립니다.
+        </p>
       </section>
 
       {/* 비용 안내 */}
