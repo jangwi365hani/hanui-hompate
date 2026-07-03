@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowLeft, Phone, FileText, Accessibility, Brain, Bed, Bone, HeartPulse, Home,
-  Stethoscope, Syringe, Flame, Leaf, CheckCircle2, MapPin, MessageCircle,
+  Stethoscope, Syringe, Flame, CheckCircle2, MapPin, MessageCircle,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ const CARES = [
   { Icon: Stethoscope, title: "진찰·건강 상태 평가", desc: "증상 확인, 맥진·복진 등 한의 진찰과 경과 관찰" },
   { Icon: Syringe, title: "침·약침 치료", desc: "통증·마비·순환 개선을 위한 침 및 약침 시술" },
   { Icon: Flame, title: "뜸·부항", desc: "냉증·근긴장 완화를 위한 뜸과 부항 처치" },
-  { Icon: Leaf, title: "한약 처방", desc: "체질·상태에 맞춘 한약 처방과 복약 지도" },
+  { Icon: Bed, title: "창상 및 욕창관리", desc: "욕창·상처 부위 소독과 드레싱 등 창상 관리" },
 ];
 
 const STEPS = [
