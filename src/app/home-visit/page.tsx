@@ -8,13 +8,13 @@ import {
 export const metadata: Metadata = {
   title: "방문진료센터 · 장위365경희한의원",
   description:
-    "거동이 불편해 내원이 어려운 분들을 위해 한의사가 직접 방문하여 침·뜸·한약 등 맞춤 한의 진료를 제공하는 장위365경희한의원 방문진료센터입니다. 성북구 장위동 인근 방문, 건강보험(시범수가) 적용.",
+    "거동이 불편해 내원이 어려운 분들을 위해 한의사가 직접 방문하여 침·뜸 등 맞춤 한의 진료를 제공하는 장위365경희한의원 방문진료센터입니다. 성북구 장위동 인근 방문, 건강보험(시범수가) 적용.",
 };
 
 const HERO_POINTS = [
   { big: "한의사", small: "직접 방문 진료" },
   { big: "건강보험", small: "시범수가 적용" },
-  { big: "침·뜸·한약", small: "가정 내 처치" },
+  { big: "침·뜸 치료", small: "가정 내 처치" },
   { big: "성북구", small: "장위동 인근 방문" },
 ];
 
@@ -37,7 +37,7 @@ const CARES = [
 const STEPS = [
   { n: 1, title: "전화 상담·신청", desc: "환자 상태와 주소를 확인하고 방문 가능 여부를 안내드립니다" },
   { n: 2, title: "방문 일정 조율", desc: "보호자와 협의하여 방문 날짜·시간을 예약합니다" },
-  { n: 3, title: "가정 방문 진료", desc: "한의사가 직접 방문해 진찰과 침·뜸·한약 처치를 진행합니다" },
+  { n: 3, title: "가정 방문 진료", desc: "한의사가 직접 방문해 진찰과 침·뜸 처치를 진행합니다" },
   { n: 4, title: "지속 관리", desc: "경과에 따라 정기 방문 및 복약·재활 관리를 이어갑니다" },
 ];
 
@@ -66,7 +66,7 @@ export default function HomeVisitPage() {
           <div>
             <span className="inline-block text-xs font-bold bg-white/15 px-3 py-1.5 rounded-full mb-5">보건복지부 일차의료 한의 방문진료 수가 시범사업 참여기관</span>
             <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-5">병원에 오기 어려우시면,<br />저희가 찾아뵙겠습니다</h1>
-            <p className="text-white/85 text-lg leading-relaxed mb-8">거동이 불편해 내원이 어려운 분들을 위해<br />한의사가 직접 댁으로 방문하여 침·뜸·한약 등<br />맞춤 한의 진료를 제공하는 <b className="text-white">장위365 방문진료센터</b>입니다.</p>
+            <p className="text-white/85 text-lg leading-relaxed mb-8">거동이 불편해 내원이 어려운 분들을 위해<br />한의사가 직접 댁으로 방문하여 침·뜸 등<br />맞춤 한의 진료를 제공하는 <b className="text-white">장위365 방문진료센터</b>입니다.</p>
             <div className="flex flex-wrap gap-3">
               <a href="tel:0269522800" className="inline-flex items-center gap-2 bg-white text-[#8B1A2B] font-bold px-8 py-3.5 rounded-full shadow-md hover:bg-[#fdf3f4] transition-colors"><Phone className="w-5 h-5" /> 방문 상담·신청</a>
               <a href="#cost" className="inline-flex items-center gap-2 bg-white/15 text-white font-bold px-8 py-3.5 rounded-full border border-white/30 hover:bg-white/25 transition-colors"><FileText className="w-5 h-5" /> 시범사업 안내</a>
