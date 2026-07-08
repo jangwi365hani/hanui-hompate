@@ -387,11 +387,6 @@ export default function Home() {
               </div>
             </div>
           </article>
-
-          {/* 하단 각주 (필수 · 삭제 금지) */}
-          <p className="max-w-3xl mx-auto mt-6 text-xs text-gray-500 leading-relaxed">
-            ※ 본 연구는 세포 및 동물(제브라피시) 실험을 통한 전임상 연구이며, 사람에 대한 치료 효과를 입증한 것은 아닙니다. 향후 추가 연구가 필요한 단계입니다.
-          </p>
         </div>
       </section>
 
