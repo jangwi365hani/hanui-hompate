@@ -306,7 +306,10 @@ export default function Home() {
           <div className="text-center mb-16" data-reveal>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Medical Team</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">의료진 소개</h2>
-            <p className="text-gray-500 mt-4 text-sm">다양한 임상 경험을 갖춘 4인의 전문 원장이 함께합니다.</p>
+            {/* 인원수는 실제 노출 중인 원장 수에서 가져온다 — 숫자를 손으로 고치다 실제와 어긋난 적이 있다 */}
+            <p className="text-gray-500 mt-4 text-sm">
+              다양한 임상 경험을 갖춘 {doctors.filter((doc) => doc.isActive).length}인의 전문 원장이 함께합니다.
+            </p>
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             {doctors.filter((doc) => doc.isActive).map((doc) => (
