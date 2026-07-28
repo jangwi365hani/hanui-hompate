@@ -5,10 +5,12 @@ import Link from "next/link";
 import {
   Phone, MapPin, Train, Bus, ParkingCircle, Clock, ChevronRight,
   Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X, Home as HomeIcon,
-  FlaskConical, ExternalLink, BadgeCheck
+  FlaskConical, ExternalLink, BadgeCheck, Activity, ScanLine, Droplets, Ruler, Waves, Package, Zap
 } from "lucide-react";
 import PopupBanner from "@/components/PopupBanner";
 import ReviewsSection from "@/components/ReviewsSection";
+import ScrollReveal from "@/components/ScrollReveal";
+import CountUp from "@/components/CountUp";
 
 // primary=true 만 데스크톱 상단 내비에 노출(혼잡 완화). 나머지는 모바일 메뉴·푸터에서 접근.
 const NAV_LINKS = [
@@ -18,6 +20,7 @@ const NAV_LINKS = [
   { label: "진료과목", href: "#services", primary: true },
   { label: "연구·근거", href: "#research", primary: true },
   { label: "둘러보기", href: "#facility", primary: false },
+  { label: "보유 장비", href: "#equipment", primary: false },
   { label: "진료안내", href: "#info", primary: false },
   { label: "오시는 길", href: "#location", primary: true },
   { label: "이벤트", href: "/events", primary: true },
@@ -78,6 +81,56 @@ const FACILITY = [
   { src: "/images/facility-treatment.jpg", title: "치료실",      desc: "프라이버시를 지키는 1:1 커튼 베드" },
 ];
 
+/**
+ * 보유 장비 — 원장 확인 목록(2026-07-28).
+ *
+ * 표기 원칙: 제조사·모델명과 '무엇에 쓰는지'만 사실대로 적는다.
+ * "최신·최고·유일" 같은 최상급 표현이나 효과 보장 문구는 넣지 않는다(의료법 제56조).
+ * image 는 원내에서 직접 촬영한 사진을 넣는 자리 — 비어 있으면 아이콘 카드로 표시된다.
+ * (제조사 홈페이지 제품 사진은 저작권이 있어 임의로 가져다 쓰지 않는다)
+ */
+const EQUIPMENT_GROUPS = [
+  {
+    group: "진단",
+    desc: "눈으로 보이지 않는 상태를 확인하고 기록합니다.",
+    items: [
+      { Icon: ScanLine, name: "알피니언 XC90E", type: "근골격 초음파", desc: "통증 부위의 근육·힘줄 상태를 진료실에서 바로 확인합니다.", image: "" },
+      { Icon: ScanLine, name: "GE Vscan", type: "휴대용 초음파", desc: "방문진료 등 진료실 밖에서도 초음파 확인이 가능합니다.", image: "" },
+      { Icon: Droplets, name: "PT10", type: "혈액검사기", desc: "원내에서 혈액 검사를 진행해 결과를 빠르게 확인합니다.", image: "" },
+      { Icon: Activity, name: "ACCUNIQ", type: "체성분 분석", desc: "체지방·근육량 등 몸의 구성을 측정해 경과를 비교합니다.", image: "" },
+      { Icon: Ruler, name: "아이밸런스", type: "체형 측정기", desc: "자세와 체형의 균형 상태를 측정해 치료 계획에 반영합니다.", image: "" },
+    ],
+  },
+  {
+    group: "치료 · 전기 · 충격파",
+    desc: "증상과 단계에 맞춰 장비를 함께 사용합니다.",
+    items: [
+      { Icon: Waves, name: "제우스", type: "체외충격파", desc: "충격파를 이용해 만성 통증 부위를 자극하는 치료 장비입니다.", image: "" },
+      { Icon: Activity, name: "스트라텍 STN-330", type: "전침기", desc: "침 치료에 미세 전기 자극을 더할 때 사용합니다.", image: "" },
+      { Icon: Zap, name: "스트라텍 SPMI-330", type: "전기 치료", desc: "치료 부위와 상태에 맞춰 전기 자극을 조절해 사용합니다.", image: "" },
+      { Icon: Zap, name: "굿플 메디플러스", type: "전기 치료", desc: "침·물리 치료와 함께 사용하는 전기 치료 장비입니다.", image: "" },
+      { Icon: Zap, name: "윌트리 LT3000", type: "전기 치료", desc: "통증 부위에 맞춰 자극 강도를 조절해 사용합니다.", image: "" },
+      { Icon: Zap, name: "굿플 D&B", type: "전기 치료", desc: "치료 단계에 따라 다른 장비와 함께 사용합니다.", image: "" },
+    ],
+  },
+  {
+    group: "치료 · 교정 · 수기",
+    desc: "손으로 하는 치료를 안정적으로 받쳐 줍니다.",
+    items: [
+      { Icon: Bone, name: "영일엠 707", type: "체형 교정기", desc: "척추·골반 교정 치료를 보조합니다.", image: "" },
+      { Icon: Bone, name: "아이밸런스 리엔더 테이블", type: "추나 치료 테이블", desc: "추나·도수 치료 시 자세를 안정적으로 잡아 줍니다.", image: "" },
+    ],
+  },
+  {
+    group: "한약 조제",
+    desc: "처방한 한약을 원내에서 직접 달이고 포장합니다.",
+    items: [
+      { Icon: FlaskConical, name: "일광 약탕기", type: "탕전 설비", desc: "처방에 맞춰 원내에서 직접 달입니다.", image: "" },
+      { Icon: Package, name: "SAVER", type: "한약 포장기", desc: "달인 한약을 위생적으로 포장합니다.", image: "" },
+    ],
+  },
+];
+
 const HOURS = [
   { day: "월 · 화 · 수 · 목 · 금", time: "10:00 – 21:00", note: "평일" },
   { day: "토 · 일 · 공휴일",        time: "10:00 – 17:00", note: "주말·공휴일" },
@@ -109,10 +162,15 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
+  // 글꼴은 layout 에서 Pretendard 로 지정한다.
+  // 예전에는 이 div 에 인라인 style 로 'Apple SD Gothic Neo'/'Noto Sans KR' 를 강제해서
+  // 윈도우·안드로이드에는 두 글꼴이 없어 시스템 기본 글꼴로 떨어졌다.
   return (
-    <div className="min-h-screen flex flex-col" style={{ fontFamily: "'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" }}>
+    <div className="min-h-screen flex flex-col">
 
       <PopupBanner />
+
+      <ScrollReveal />
 
       {/* 헤더 */}
       <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
@@ -189,11 +247,13 @@ export default function Home() {
       </section>
 
       {/* 통계 배너 */}
-      <section className="bg-[#8B1A2B] text-white py-10 px-6">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <section className="bg-[#8B1A2B] text-white py-12 px-6">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {STATS.map((s) => (
-            <div key={s.label}>
-              <p className="text-3xl font-bold mb-1">{s.num}</p>
+            <div key={s.label} data-reveal>
+              <p className="text-3xl md:text-[34px] font-bold mb-1 tracking-tight">
+                <CountUp value={s.num} />
+              </p>
               <p className="text-[#f5cdd1] text-sm">{s.label}</p>
             </div>
           ))}
@@ -201,7 +261,7 @@ export default function Home() {
       </section>
 
       {/* 한의원 소개 */}
-      <section id="about" className="py-28 px-6 bg-white">
+      <section id="about" className="py-24 md:py-28 px-6 bg-white">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-20 items-center">
           <div>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">About Us</span>
@@ -241,9 +301,9 @@ export default function Home() {
       </section>
 
       {/* 의료진 소개 */}
-      <section id="doctors" className="py-28 px-6 bg-gray-50">
+      <section id="doctors" className="py-24 md:py-28 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Medical Team</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">의료진 소개</h2>
             <p className="text-gray-500 mt-4 text-sm">다양한 임상 경험을 갖춘 4인의 전문 원장이 함께합니다.</p>
@@ -272,9 +332,9 @@ export default function Home() {
       </section>
 
       {/* 증상별 안내 */}
-      <section id="symptoms" className="py-28 px-6 bg-white">
+      <section id="symptoms" className="py-24 md:py-28 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Find Your Care</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">이런 증상, 어디로 가야 할까요?</h2>
             <p className="text-gray-500 mt-4 max-w-md mx-auto text-sm leading-relaxed">
@@ -299,9 +359,9 @@ export default function Home() {
       </section>
 
       {/* 진료과목 */}
-      <section id="services" className="py-28 px-6 bg-gray-50">
+      <section id="services" className="py-24 md:py-28 px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Services</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">주요 진료과목</h2>
             <p className="text-gray-500 mt-4 max-w-md mx-auto text-sm leading-relaxed">
@@ -323,9 +383,9 @@ export default function Home() {
       </section>
 
       {/* 연구·근거 (Research) — 논문 정보/원문 링크는 게시 전 수동 확인 필요 */}
-      <section id="research" className="py-28 px-6 bg-white">
+      <section id="research" className="py-24 md:py-28 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14">
+          <div className="text-center mb-14" data-reveal>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Research</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">근거를 만드는 진료 — 연구하는 한의원</h2>
           </div>
@@ -391,9 +451,9 @@ export default function Home() {
       </section>
 
       {/* 시설 둘러보기 */}
-      <section id="facility" className="py-28 px-6 bg-white">
+      <section id="facility" className="py-24 md:py-28 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Our Space</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">둘러보기</h2>
             <p className="text-gray-500 mt-4 max-w-md mx-auto text-sm leading-relaxed">
@@ -415,10 +475,60 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 보유 장비 — 사진은 원내 촬영본을 넣는 자리(EQUIPMENT_GROUPS 의 image) */}
+      <section id="equipment" className="py-24 md:py-28 px-6 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-14" data-reveal>
+            <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Equipment</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">보유 장비</h2>
+            <p className="text-gray-500 mt-4 max-w-lg mx-auto text-sm leading-relaxed">
+              진단부터 치료, 한약 조제까지 원내에서 확인하고 관리합니다.
+            </p>
+          </div>
+
+          <div className="space-y-12">
+            {EQUIPMENT_GROUPS.map((g) => (
+              <div key={g.group} data-reveal>
+                <div className="flex items-baseline gap-3 mb-5">
+                  <h3 className="text-lg font-bold text-gray-900">{g.group}</h3>
+                  <p className="text-sm text-gray-500">{g.desc}</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {g.items.map((it) => (
+                    <div
+                      key={it.name}
+                      className="group bg-white rounded-2xl border border-gray-100 p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-[#e6c9ce]"
+                    >
+                      {it.image ? (
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-4 bg-gray-50">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={it.image} alt={`${it.name} ${it.type}`} className="w-full h-full object-cover" />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-[#faf0f1] grid place-items-center mb-4 transition-colors group-hover:bg-[#f3dcdf]">
+                          <it.Icon className="w-6 h-6 text-[#8B1A2B]" strokeWidth={1.6} />
+                        </div>
+                      )}
+                      <p className="text-xs font-semibold tracking-wider text-[#a0293a] uppercase">{it.type}</p>
+                      <h4 className="text-lg font-bold text-gray-900 mt-1">{it.name}</h4>
+                      <p className="text-sm text-gray-600 mt-2 leading-relaxed">{it.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs text-gray-400 mt-10 text-center leading-relaxed" data-reveal>
+            장비는 진료 목적과 환자 상태에 따라 선택적으로 사용되며, 모든 환자에게 동일하게 적용되지 않습니다.
+          </p>
+        </div>
+      </section>
+
       {/* 진료안내 */}
-      <section id="info" className="py-28 px-6 bg-gray-50">
+      <section id="info" className="py-24 md:py-28 px-6 bg-gray-50">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Information</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">진료 안내</h2>
           </div>
@@ -464,9 +574,9 @@ export default function Home() {
       <ReviewsSection />
 
       {/* 오시는 길 */}
-      <section id="location" className="py-28 px-6 bg-white">
+      <section id="location" className="py-24 md:py-28 px-6 bg-white">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-reveal>
             <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">Location</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">오시는 길</h2>
           </div>

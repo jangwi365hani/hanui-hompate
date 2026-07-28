@@ -8,21 +8,52 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-pretendard);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ⚠ 다크모드 자동 반전은 쓰지 않는다.
+   섹션 배경은 bg-white / bg-gray-50 로 고정돼 있는데 글자색만 밝게 뒤집히면
+   흰 배경에 흰 글씨가 되는 곳이 생긴다(브라우저를 어두운 테마로 쓰는 환자 화면에서만
+   글이 안 보이는 문제). 이 사이트는 밝은 화면 하나로 간다. */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-pretendard), -apple-system, "Apple SD Gothic Neo", sans-serif;
+  /* 한글은 자간을 살짝 좁혀야 덩어리져 보이지 않는다 */
+  letter-spacing: -0.01em;
+  word-break: keep-all; /* 단어 중간에서 줄바꿈되지 않게 (한글 가독성) */
+}
+
+/* 제목은 더 촘촘하게 — 큰 글자일수록 기본 자간이 넓어 보인다 */
+h1, h2, h3 {
+  letter-spacing: -0.03em;
+}
+
+/* ── 스크롤 등장 ─────────────────────────────────────────────
+   data-reveal 이 붙은 요소가 화면에 들어오면 한 번만 부드럽게 올라온다.
+   JS 가 실패해도 .is-in 이 안 붙을 뿐 내용은 그대로 보인다(no-js 안전). */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+[data-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* 리치 에디터 - 편집 영역 내부 스타일 */
