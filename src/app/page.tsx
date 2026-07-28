@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Phone, MapPin, Train, Bus, ParkingCircle, Clock, ChevronRight,
   Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X, Home as HomeIcon,
-  FlaskConical, ExternalLink, BadgeCheck, Activity, ScanLine, Droplets, Ruler, Waves, Package, Zap
+  FlaskConical, ExternalLink, BadgeCheck, Activity, ScanLine, Droplets, Ruler, Waves, Package, Zap, Pill
 } from "lucide-react";
 import PopupBanner from "@/components/PopupBanner";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -651,8 +651,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 우측 플로팅 버튼 (스크롤 따라 고정) — 방문진료 → 카카오 문의 순 */}
+      {/* 우측 플로팅 버튼 (스크롤 따라 고정) — 쏙쏙다이어트 → 방문진료 → 카카오 문의 순 */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+        {/* 다이어트 브랜드 사이트 — 별도 도메인이라 새 탭으로 연다 */}
+        <a
+          href="https://ssoksokdiet.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 bg-[#B4552F] text-white text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#9c4726] hover:scale-105 transition-all duration-200"
+        >
+          <Pill size={20} />
+          쏙쏙다이어트
+        </a>
         <Link
           href="/home-visit"
           className="flex items-center gap-2 bg-[#8B1A2B] text-white text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#a0293a] hover:scale-105 transition-all duration-200"
