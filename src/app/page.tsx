@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Phone, MapPin, Train, Bus, ParkingCircle, Clock, ChevronRight,
   Bone, Leaf, Heart, Wind, Sparkles, Baby, Brain, TrendingDown, Utensils, Menu, X, Home as HomeIcon,
-  FlaskConical, ExternalLink, BadgeCheck, Activity, ScanLine, Droplets, Ruler, Waves, Package
+  FlaskConical, ExternalLink, BadgeCheck, Activity, ScanLine, Droplets, Ruler, Waves, Package, Zap
 } from "lucide-react";
 import PopupBanner from "@/components/PopupBanner";
 import ReviewsSection from "@/components/ReviewsSection";
@@ -102,11 +102,21 @@ const EQUIPMENT_GROUPS = [
     ],
   },
   {
-    group: "치료",
+    group: "치료 · 전기 · 충격파",
     desc: "증상과 단계에 맞춰 장비를 함께 사용합니다.",
     items: [
       { Icon: Waves, name: "제우스", type: "체외충격파", desc: "충격파를 이용해 만성 통증 부위를 자극하는 치료 장비입니다.", image: "" },
       { Icon: Activity, name: "스트라텍 STN-330", type: "전침기", desc: "침 치료에 미세 전기 자극을 더할 때 사용합니다.", image: "" },
+      { Icon: Zap, name: "스트라텍 SPMI-330", type: "전기 치료", desc: "치료 부위와 상태에 맞춰 전기 자극을 조절해 사용합니다.", image: "" },
+      { Icon: Zap, name: "굿플 메디플러스", type: "전기 치료", desc: "침·물리 치료와 함께 사용하는 전기 치료 장비입니다.", image: "" },
+      { Icon: Zap, name: "윌트리 LT3000", type: "전기 치료", desc: "통증 부위에 맞춰 자극 강도를 조절해 사용합니다.", image: "" },
+      { Icon: Zap, name: "굿플 D&B", type: "전기 치료", desc: "치료 단계에 따라 다른 장비와 함께 사용합니다.", image: "" },
+    ],
+  },
+  {
+    group: "치료 · 교정 · 수기",
+    desc: "손으로 하는 치료를 안정적으로 받쳐 줍니다.",
+    items: [
       { Icon: Bone, name: "영일엠 707", type: "체형 교정기", desc: "척추·골반 교정 치료를 보조합니다.", image: "" },
       { Icon: Bone, name: "아이밸런스 리엔더 테이블", type: "추나 치료 테이블", desc: "추나·도수 치료 시 자세를 안정적으로 잡아 줍니다.", image: "" },
     ],
