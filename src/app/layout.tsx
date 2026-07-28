@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+/**
+ * 본문 글꼴 — Pretendard.
+ * 이전에는 영문 전용 Geist 만 불러오고 body 는 Arial 로 두어, 한글이 시스템 기본 글꼴
+ * (윈도우 맑은 고딕 / 안드로이드 나눔고딕)로 렌더됐다. 기기마다 자간·굵기가 달라 보이던 원인.
+ * 가변 글꼴 하나로 100~900 굵기를 모두 쓰므로 요청은 1회뿐이다.
+ */
+const pretendard = localFont({
+  src: "./fonts/PretendardVariable.woff2",
+  display: "swap",
+  weight: "45 920",
+  variable: "--font-pretendard",
 });
 
 const SITE_URL = "https://jangwi365.com";
@@ -110,7 +113,7 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${pretendard.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <script
