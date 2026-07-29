@@ -695,7 +695,8 @@ export default function Home() {
             <p className="mt-1">사업자등록번호: 187-09-02837</p>
           </div>
           <div className="text-center md:text-right">
-            <nav className="flex gap-5 text-gray-500 text-xs mb-3 justify-center md:justify-end">
+            {/* 링크 8개가 한 줄에 다 안 들어가 폰에서 화면 밖으로 삐져나갔다 → 줄바꿈 허용 */}
+            <nav className="flex flex-wrap gap-x-4 gap-y-2 md:gap-5 text-gray-500 text-xs mb-3 justify-center md:justify-end">
               {NAV_LINKS.map((l) => (
                 <a key={l.href} href={l.href} className="hover:text-white transition-colors">{l.label}</a>
               ))}
