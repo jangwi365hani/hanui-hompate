@@ -661,28 +661,31 @@ export default function Home() {
           href="https://ssoksokdiet.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 bg-[#B4552F] text-white text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#9c4726] hover:scale-105 transition-all duration-200"
+          aria-label="쏙쏙다이어트"
+          className="flex items-center md:gap-2 bg-[#B4552F] text-white text-sm font-bold p-3.5 md:px-4 md:py-3 rounded-full shadow-lg hover:bg-[#9c4726] hover:scale-105 transition-all duration-200"
         >
           <Pill size={20} />
-          쏙쏙다이어트
+          <span className="hidden md:inline">쏙쏙다이어트</span>
         </a>
         <Link
           href="/home-visit"
-          className="flex items-center gap-2 bg-[#8B1A2B] text-white text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#a0293a] hover:scale-105 transition-all duration-200"
+          aria-label="방문진료센터"
+          className="flex items-center md:gap-2 bg-[#8B1A2B] text-white text-sm font-bold p-3.5 md:px-4 md:py-3 rounded-full shadow-lg hover:bg-[#a0293a] hover:scale-105 transition-all duration-200"
         >
           <HomeIcon size={20} />
-          방문진료센터
+          <span className="hidden md:inline">방문진료센터</span>
         </Link>
         <a
           href="http://pf.kakao.com/_EkrXs"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 bg-[#FEE500] text-[#3A1D1D] text-sm font-bold px-4 py-3 rounded-full shadow-lg hover:bg-[#f5dc00] hover:scale-105 transition-all duration-200"
+          aria-label="카카오 문의"
+          className="flex items-center md:gap-2 bg-[#FEE500] text-[#3A1D1D] text-sm font-bold p-3.5 md:px-4 md:py-3 rounded-full shadow-lg hover:bg-[#f5dc00] hover:scale-105 transition-all duration-200"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="#3A1D1D">
             <path d="M12 3C7.03 3 3 6.36 3 10.5c0 2.7 1.7 5.05 4.25 6.4L6.1 21l4.6-2.9c.42.05.86.08 1.3.08 4.97 0 9-3.36 9-7.5S16.97 3 12 3z"/>
           </svg>
-          카카오 문의
+          <span className="hidden md:inline">카카오 문의</span>
         </a>
       </div>
 
@@ -694,7 +697,8 @@ export default function Home() {
             <p>서울 성북구 장월로38길 4 타워39 3층&nbsp;&nbsp;|&nbsp;&nbsp;대표전화: 02-6952-2800</p>
             <p className="mt-1">사업자등록번호: 187-09-02837</p>
           </div>
-          <div className="text-center md:text-right">
+          {/* 폰에서는 우측 하단 플로팅 버튼(48px 열)이 링크·저작권 줄을 덮으므로 그만큼 비켜준다 */}
+          <div className="text-center md:text-right pr-14 md:pr-0">
             {/* 링크 8개가 한 줄에 다 안 들어가 폰에서 화면 밖으로 삐져나갔다 → 줄바꿈 허용 */}
             <nav className="flex flex-wrap gap-x-4 gap-y-2 md:gap-5 text-gray-500 text-xs mb-3 justify-center md:justify-end">
               {NAV_LINKS.map((l) => (
