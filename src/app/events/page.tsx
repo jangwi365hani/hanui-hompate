@@ -55,11 +55,17 @@ export default async function EventsPage() {
                     })}
                   </p>
                   <h2 className="text-xl font-bold text-gray-900 mb-3">{event.title}</h2>
-                  {event.content && (
-                    <p className="text-gray-600 text-sm whitespace-pre-line leading-relaxed mb-4">
-                      {event.content}
-                    </p>
-                  )}
+                  {event.content &&
+                    (/<[a-z][\s\S]*>/i.test(event.content) ? (
+                      <div
+                        className="rich-content text-gray-600 text-sm leading-relaxed mb-4"
+                        dangerouslySetInnerHTML={{ __html: event.content }}
+                      />
+                    ) : (
+                      <p className="text-gray-600 text-sm whitespace-pre-line leading-relaxed mb-4">
+                        {event.content}
+                      </p>
+                    ))}
                   {event.linkUrl && (
                     <a
                       href={event.linkUrl}
