@@ -27,11 +27,12 @@ const NAV_LINKS = [
   { label: "건강칼럼", href: "/columns", primary: true },
 ];
 
+// 개원(2021-08-01)부터 5주년까지 실제 진료 기록 집계 — 2021-08-01 ~ 2026-07-31
 const STATS = [
-  { num: "10+", label: "년 진료 경력" },
-  { num: "10,000+", label: "누적 환자" },
-  { num: "365일", label: "연중 진료" },
-  { num: "100%", label: "맞춤 치료" },
+  { num: "12,201명", label: "누적 내원 환자" },
+  { num: "144,299건", label: "총 진료 건수" },
+  { num: "11,754건", label: "처방된 한약" },
+  { num: "1,819일", label: "5년간 문을 연 날" },
 ];
 
 interface Doctor {
@@ -248,15 +249,21 @@ export default function Home() {
 
       {/* 통계 배너 */}
       <section className="bg-[#8B1A2B] text-white py-12 px-6">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          {STATS.map((s) => (
-            <div key={s.label} data-reveal>
-              <p className="text-3xl md:text-[34px] font-bold mb-1 tracking-tight">
-                <CountUp value={s.num} />
-              </p>
-              <p className="text-[#f5cdd1] text-sm">{s.label}</p>
-            </div>
-          ))}
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-[#f5cdd1] text-sm md:text-base mb-8" data-reveal>
+            지난 5년, 숫자로 돌아보기
+          </p>
+          {/* 숫자가 길어 모바일 2열에서 넘치지 않도록 글자 크기를 단계별로 준다 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8 text-center">
+            {STATS.map((s) => (
+              <div key={s.label} data-reveal>
+                <p className="text-[22px] sm:text-3xl md:text-[32px] font-bold mb-1 tracking-tight">
+                  <CountUp value={s.num} />
+                </p>
+                <p className="text-[#f5cdd1] text-xs sm:text-sm">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
