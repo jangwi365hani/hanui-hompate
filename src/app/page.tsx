@@ -95,7 +95,7 @@ const EQUIPMENT_GROUPS = [
     group: "진단",
     desc: "눈으로 보이지 않는 상태를 확인하고 기록합니다.",
     items: [
-      { Icon: ScanLine, name: "알피니언 XC90E", type: "근골격 초음파", desc: "통증 부위의 근육·힘줄 상태를 진료실에서 바로 확인합니다.", image: "" },
+      { Icon: ScanLine, name: "알피니언 XC90E", type: "근골격 초음파", desc: "대학병원에서도 쓰이는 고사양 초음파 장비로, 통증 부위의 근육·힘줄 상태를 진료실에서 바로 확인합니다.", image: "" },
       { Icon: ScanLine, name: "GE Vscan", type: "휴대용 초음파", desc: "방문진료 등 진료실 밖에서도 초음파 확인이 가능합니다.", image: "" },
       { Icon: Droplets, name: "PT10", type: "혈액검사기", desc: "원내에서 혈액 검사를 진행해 결과를 빠르게 확인합니다.", image: "" },
       { Icon: Activity, name: "ACCUNIQ", type: "체성분 분석", desc: "체지방·근육량 등 몸의 구성을 측정해 경과를 비교합니다.", image: "" },
