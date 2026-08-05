@@ -5,6 +5,13 @@ import { ArrowLeft } from "lucide-react";
 import { getColumns } from "@/lib/data";
 import { notFound } from "next/navigation";
 import ColumnView from "./ColumnView";
+import JsonLd, { breadcrumb, SITE_URL, CLINIC_ID } from "@/components/JsonLd";
+
+// 본문 앞부분을 요약으로 — 답변 엔진은 description이 있는 글을 훨씬 잘 인용한다
+function summarize(html: string, n = 200): string {
+  const t = (html || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+  return t.length > n ? t.slice(0, n) + "…" : t;
+}
 
 export default async function ColumnDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -16,6 +23,31 @@ export default async function ColumnDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="min-h-screen bg-white">
+      {/* 이 글이 '누가·언제 쓴 어느 병원의 건강 정보'인지 기계가 알 수 있게 명시 */}
+      <JsonLd
+        data={[
+          breadcrumb([
+            { name: "건강칼럼", path: "/columns" },
+            { name: col.title, path: `/columns/${col.id}` },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: col.title.slice(0, 110),
+            description: summarize(col.content),
+            datePublished: col.createdAt,
+            dateModified: col.createdAt,
+            inLanguage: "ko-KR",
+            ...(col.imageUrl ? { image: col.imageUrl } : {}),
+            ...(col.category ? { articleSection: col.category } : {}),
+            author: col.author
+              ? { "@type": "Person", name: col.author, affiliation: { "@id": CLINIC_ID } }
+              : { "@id": CLINIC_ID },
+            publisher: { "@id": CLINIC_ID },
+            mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/columns/${col.id}` },
+          },
+        ]}
+      />
       <div className="bg-[#8B1A2B] text-white">
         <div className="max-w-3xl mx-auto px-4 py-6 flex items-center gap-3">
           <Link href="/columns" className="hover:opacity-75 transition">

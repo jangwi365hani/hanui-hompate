@@ -23,6 +23,7 @@ const NAV_LINKS = [
   { label: "보유 장비", href: "#equipment", primary: false },
   { label: "진료안내", href: "#info", primary: false },
   { label: "오시는 길", href: "#location", primary: true },
+  { label: "자주 묻는 질문", href: "#faq", primary: false },
   { label: "이벤트", href: "/events", primary: true },
   { label: "건강칼럼", href: "/columns", primary: true },
 ];
@@ -146,6 +147,68 @@ const LOCATION_INFO = [
   { Icon: ParkingCircle, label: "주차",   value: "건물 뒷편 주차타워 이용" },
 ];
 
+/**
+ * 자주 묻는 질문 (AEO — Answer Engine Optimization)
+ *
+ * 검색결과 상단의 '질문-답변' 블록과 챗봇 답변에 인용되려면, 답이 **텍스트로** 있어야 한다.
+ * 이 배열 하나가 화면(질문형 h3)과 FAQPage 구조화데이터 양쪽의 원본이다 —
+ * 화면에 없는 답을 스키마에만 넣는 것은 구글 정책 위반이라 반드시 같은 값을 쓴다.
+ *
+ * 답변 원칙: 확인된 사실만. 효과 보장·최상급 표현 금지(의료법 제56조).
+ *   진료시간·주소·전화 = HOURS / LOCATION_INFO 와 일치시킬 것
+ *   주차 = public/images/parkingexplain.jpg 의 실제 안내문을 옮긴 것
+ */
+const FAQS: { q: string; a: string }[] = [
+  {
+    q: "진료 시간이 어떻게 되나요?",
+    a: "평일(월~금)은 오전 10시부터 밤 9시까지, 토요일·일요일·공휴일은 오전 10시부터 오후 5시까지 진료합니다. 점심시간은 매일 오후 1시부터 2시까지입니다. 공휴일을 포함해 365일 문을 열며, 평일은 밤 9시까지 야간진료를 합니다.",
+  },
+  {
+    q: "주말이나 공휴일에도 진료하나요?",
+    a: "네, 토요일·일요일·공휴일 모두 오전 10시부터 오후 5시까지 진료합니다(점심시간 오후 1~2시 제외). 설·추석 등 일부 명절은 별도로 공지합니다.",
+  },
+  {
+    q: "주차할 수 있나요?",
+    a: "두 가지 방법이 있습니다. 첫째, 장위3동 마을공영주차장을 이용하시고 치료 후 주차비 영수증을 지참하시면 영수증에 적힌 금액에 한하여 주차비를 지원해 드립니다(다음 내원 시 제출하셔도 됩니다). 둘째, 병원 뒷편 타워주차장은 무료로 이용하실 수 있습니다. 다만 골목이 매우 좁고 주차를 관리하는 인력이 없어, 차량 손상이 걱정되시면 첫 번째 방법을 권해 드립니다.",
+  },
+  {
+    q: "지하철이나 버스로 어떻게 가나요?",
+    a: "지하철 6호선 돌곶이역에서 도보 5분 거리입니다. 버스는 장위동 정류장에서 내리시면 됩니다. 주소는 서울 성북구 장월로38길 4 타워39 3층이고, 대표전화는 02-6952-2800입니다.",
+  },
+  {
+    q: "예약은 어떻게 하나요? 예약 없이 가도 되나요?",
+    a: "네이버 예약 또는 전화(02-6952-2800)로 예약하실 수 있습니다. 예약 없이 방문하셔도 진료를 받으실 수 있지만, 대기 시간을 줄이려면 예약 후 방문을 권해 드립니다.",
+  },
+  {
+    q: "교통사고 치료도 자동차보험으로 받을 수 있나요?",
+    a: "네, 자동차보험 진료를 하고 있습니다. 접수하실 때 보험사와 사고접수번호를 알려주시면 진료가 진행됩니다. 접수번호가 아직 없어도 먼저 내원해 진료받으신 뒤 나중에 알려주셔도 됩니다. 보장 범위는 과실 비율과 상해등급에 따라 달라지므로 접수 시 안내해 드립니다.",
+  },
+  {
+    q: "추나요법도 건강보험이 되나요?",
+    a: "네, 추나요법은 건강보험이 적용됩니다. 다만 환자 한 분당 연간 이용 횟수 한도가 정해져 있어, 남은 횟수는 접수 시 확인해 안내해 드립니다.",
+  },
+  {
+    q: "한약(첩약)도 건강보험이 적용되나요?",
+    a: "저희는 첩약 건강보험 시범사업 참여 기관입니다. 월경통, 안면신경마비, 알레르기 비염, 기능성 소화불량, 요추추간판탈출증 등 시범사업 대상 질환에 해당하면 건강보험이 적용된 첩약을 처방받으실 수 있습니다. 대상 여부는 진료 후 원장이 판단해 안내해 드립니다.",
+  },
+  {
+    q: "아이도 진료받을 수 있나요?",
+    a: "네, 소아 성장 클리닉을 운영하고 있습니다. 체성분 분석과 체질 평가를 바탕으로 성장 상태를 확인하고 관리 방향을 안내해 드립니다.",
+  },
+  {
+    q: "거동이 불편해 내원이 어려운데 방문진료가 되나요?",
+    a: "네, 일차의료 한의 방문진료 시범사업 참여 기관으로 한의사가 직접 댁으로 방문해 침·뜸 등 진료를 제공합니다. 장위동·석관동·월곡동과 인근 지역이 대상이며 건강보험(시범수가)이 적용됩니다. 자세한 내용은 방문진료센터 안내를 참고해 주세요.",
+  },
+  {
+    q: "첫 방문 때 무엇을 준비해야 하나요?",
+    a: "신분증을 지참해 주세요(건강보험 자격 확인에 필요합니다). 복용 중인 약이나 다른 병원에서 받은 검사 결과가 있으면 진료에 도움이 됩니다. 교통사고 진료라면 보험사와 사고접수번호를 알려주시면 됩니다. 첫 방문에는 간단한 문진표를 작성합니다.",
+  },
+  {
+    q: "초음파 검사도 진료실에서 바로 받을 수 있나요?",
+    a: "네, 근골격·내과 초음파 장비를 갖추고 있어 통증 부위의 근육·힘줄 상태를 진료실에서 바로 확인합니다. 필요에 따라 갑상선·간·경동맥 등도 함께 확인합니다.",
+  },
+];
+
 const NaverBadge = () => (
   <span className="inline-flex items-center justify-center w-4 h-4 bg-white text-[#03C75A] rounded-sm text-xs font-black leading-none">N</span>
 );
@@ -226,10 +289,11 @@ export default function Home() {
               <span className="inline-block bg-[#8B1A2B]/80 text-white text-xs tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 font-medium backdrop-blur-sm">
                 한의사 5인 진료
               </span>
-              <h2 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6 tracking-tight">
+              {/* 페이지의 주제를 나타내는 h1은 문서에 하나만 둔다 — 검색엔진이 무엇에 대한 페이지인지 판단하는 기준 */}
+              <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6 tracking-tight">
                 왜 반복되는지<br />
                 <span className="text-[#c97080]">함께 고민합니다</span>
-              </h2>
+              </h1>
               <p className="text-gray-300 text-base md:text-lg mb-10 leading-relaxed">
                 지금 아픈 것만 해결하지 않습니다.<br className="hidden md:block" />
                 오래 편할 수 있도록, 근본부터 함께 관리합니다.
@@ -638,12 +702,32 @@ export default function Home() {
               <ParkingCircle size={18} />
               <span className="font-bold">주차 안내</span>
             </div>
+            {/* 안내문이 이미지·영상뿐이면 검색엔진도 챗봇도 "주차 되나요?"에 답하지 못한다 → 같은 내용을 텍스트로도 둔다 */}
+            <div className="bg-white px-8 py-7 border-b border-gray-100 grid md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <span className="text-[#8B1A2B]">1.</span> 장위3동 마을공영주차장 이용
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  병원에 내원하여 치료 후 주차비 영수증을 지참하시거나, 다음 내원 시 혹은 잠시 주정차 후 병원에 내원하시면
+                  영수증에 적힌 금액에 한하여 주차비를 지원해 드립니다.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                  <span className="text-[#8B1A2B]">2.</span> 병원 뒷편 타워주차장 활용 <span className="text-xs font-semibold text-[#8B1A2B] bg-[#fdf3f4] px-2 py-0.5 rounded-full">무료</span>
+                </h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  골목이 매우 좁고 주차를 관리하시는 분이 없습니다. 차량 손상이 우려되시는 분은 1번 안내로 주차를 부탁드립니다.
+                </p>
+              </div>
+            </div>
             <div className="grid md:grid-cols-2 bg-gray-50">
               <div className="relative h-80 bg-white">
-                <Image src="/images/parkingmap.jpg" alt="주차장 위치 지도" fill className="object-contain p-2" />
+                <Image src="/images/parkingmap.jpg" alt="장위3동 마을공영주차장과 병원 뒷편 타워주차장 위치 지도" fill className="object-contain p-2" />
               </div>
               <div className="relative h-80 bg-white border-t md:border-t-0 md:border-l border-gray-100">
-                <Image src="/images/parkingexplain.jpg" alt="주차 이용 안내" fill className="object-contain p-2" />
+                <Image src="/images/parkingexplain.jpg" alt="주차 이용 안내 — 마을공영주차장 주차비 지원, 뒷편 타워주차장 무료" fill className="object-contain p-2" />
               </div>
             </div>
             <div className="border-t border-gray-100 bg-white">
@@ -660,6 +744,51 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* 자주 묻는 질문 — 질문형 소제목(h3)과 답변을 텍스트로 노출해야 검색·챗봇이 인용할 수 있다 */}
+      <section id="faq" className="py-24 md:py-28 px-6 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-14" data-reveal>
+            <span className="text-xs tracking-[0.2em] text-[#a0293a] font-semibold uppercase">FAQ</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-3">자주 묻는 질문</h2>
+            <p className="text-gray-500 mt-4 text-sm">진료시간·주차·보험 등 가장 많이 문의주시는 내용을 모았습니다.</p>
+          </div>
+          <div className="space-y-3">
+            {FAQS.map(({ q, a }) => (
+              <div key={q} className="bg-white rounded-2xl border border-gray-100 p-7" data-reveal>
+                <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2.5 leading-snug">
+                  <span className="text-[#8B1A2B] mr-1.5">Q.</span>{q}
+                </h3>
+                <p className="text-sm md:text-[15px] text-gray-600 leading-relaxed">{a}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-sm text-gray-500 mt-10">
+            더 궁금한 점은 <a href="tel:02-6952-2800" className="text-[#8B1A2B] font-semibold hover:underline">02-6952-2800</a>으로
+            전화 주시거나 카카오톡으로 문의해 주세요.
+          </p>
+        </div>
+      </section>
+
+      {/*
+        FAQPage 구조화데이터 — 화면(FAQS)과 같은 값에서 생성한다.
+        화면에 없는 답을 스키마에만 넣으면 구글 정책 위반이므로 원본을 하나로 유지할 것.
+      */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "@id": "https://jangwi365.com/#faq",
+            mainEntity: FAQS.map(({ q, a }) => ({
+              "@type": "Question",
+              name: q,
+              acceptedAnswer: { "@type": "Answer", text: a },
+            })),
+          }),
+        }}
+      />
 
       {/* 우측 플로팅 버튼 (스크롤 따라 고정) — 쏙쏙다이어트 → 방문진료 → 카카오 문의 순 */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">

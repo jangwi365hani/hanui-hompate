@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getColumns } from "@/lib/data";
+import JsonLd, { breadcrumb } from "@/components/JsonLd";
 
 // HTML 본문에서 태그를 제거해 미리보기용 텍스트만 추출
 function toPlain(html: string): string {
@@ -24,6 +25,7 @@ export default async function ColumnsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <JsonLd data={breadcrumb([{ name: "건강칼럼", path: "/columns" }])} />
       <div className="bg-[#8B1A2B] text-white">
         <div className="max-w-4xl mx-auto px-4 py-6 flex items-center gap-3">
           <Link href="/" className="hover:opacity-75 transition">

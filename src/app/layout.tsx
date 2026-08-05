@@ -75,8 +75,24 @@ const jsonLd = {
         addressRegion: "서울",
         addressCountry: "KR",
       },
-      areaServed: "서울 성북구",
+      // 좌표·지도·외부 프로필 — 답변 엔진이 '이 병원'을 지도·플레이스의 같은 업체로 확정하는 근거
+      geo: { "@type": "GeoCoordinates", latitude: 37.6180562, longitude: 127.0515453 },
+      hasMap: "https://map.naver.com/p/search/장위365경희한의원",
+      sameAs: [
+        "https://m.place.naver.com/hospital/1121503413/home",
+        "https://place.map.kakao.com/1922667025",
+        "https://booking.naver.com/booking/13/bizes/567280",
+      ],
+      areaServed: ["서울 성북구", "장위동", "석관동", "월곡동", "돌곶이역"],
       publicAccess: true,
+      isAcceptingNewPatients: true,
+      knowsLanguage: "ko",
+      // 주차 가능 여부는 실제로 가장 많이 받는 질문 중 하나라 구조화데이터에도 넣는다
+      amenityFeature: [
+        { "@type": "LocationFeatureSpecification", name: "주차", value: true },
+        { "@type": "LocationFeatureSpecification", name: "야간진료", value: true },
+        { "@type": "LocationFeatureSpecification", name: "주말·공휴일 진료", value: true },
+      ],
       availableService: [
         { "@type": "MedicalProcedure", name: "척추·관절 통증 클리닉" },
         { "@type": "MedicalProcedure", name: "한방 다이어트 클리닉" },

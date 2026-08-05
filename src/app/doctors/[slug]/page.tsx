@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Phone, ChevronLeft, BadgeCheck, FileText, ExternalLink } from "lucide-react";
 import { getColumns, getDoctors } from "@/lib/data";
+import JsonLd, { breadcrumb, SITE_URL, CLINIC_ID } from "@/components/JsonLd";
 
 export default async function DoctorPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -20,6 +21,32 @@ export default async function DoctorPage({ params }: { params: Promise<{ slug: s
 
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" }}>
+      {/*
+        원장 정보는 관리자에서 수정하는 실제 값(getDoctors)에서만 만든다 —
+        코드에 박아둔 폴백 명단으로 스키마를 만들면 퇴사한 원장이 계속 노출된다.
+      */}
+      <JsonLd
+        data={[
+          breadcrumb([
+            { name: "의료진", path: "/#doctors" },
+            { name: `${doctor.name} ${doctor.title}`, path: `/doctors/${doctor.slug}` },
+          ]),
+          {
+            "@context": "https://schema.org",
+            "@type": "Physician",
+            "@id": `${SITE_URL}/doctors/${doctor.slug}#physician`,
+            name: doctor.name,
+            jobTitle: doctor.title,
+            url: `${SITE_URL}/doctors/${doctor.slug}`,
+            ...(doctor.imageUrl ? { image: doctor.imageUrl.startsWith("http") ? doctor.imageUrl : `${SITE_URL}${doctor.imageUrl}` } : {}),
+            ...(doctor.subtitle ? { description: doctor.subtitle } : {}),
+            ...(doctor.tags?.length ? { knowsAbout: doctor.tags } : {}),
+            medicalSpecialty: "https://schema.org/PrimaryCare",
+            worksFor: { "@id": CLINIC_ID },
+            workLocation: { "@id": CLINIC_ID },
+          },
+        ]}
+      />
       {/* 헤더 */}
       <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">

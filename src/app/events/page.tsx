@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getEvents } from "@/lib/data";
+import JsonLd, { breadcrumb } from "@/components/JsonLd";
 
 export default async function EventsPage() {
   const allEvents = await getEvents();
@@ -10,6 +11,7 @@ export default async function EventsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <JsonLd data={breadcrumb([{ name: "이벤트 · 공지", path: "/events" }])} />
       {/* 헤더 */}
       <div className="bg-[#8B1A2B] text-white">
         <div className="max-w-4xl mx-auto px-4 py-6 flex items-center gap-3">

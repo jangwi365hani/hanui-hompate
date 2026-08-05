@@ -4,6 +4,7 @@ import {
   ArrowLeft, Phone, FileText, Accessibility, Brain, Bed, Bone, HeartPulse, Home,
   Stethoscope, Syringe, Flame, CheckCircle2, MapPin, MessageCircle,
 } from "lucide-react";
+import JsonLd, { breadcrumb, SITE_URL, CLINIC_ID } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
   title: "방문진료센터 · 장위365경희한의원",
@@ -46,6 +47,31 @@ const AREAS = ["장위동", "석관동", "월곡동", "인근 협의"];
 export default function HomeVisitPage() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
+      {/* "거동이 불편한데 방문진료 되나요?" 류 질문에 이 페이지가 답으로 잡히도록 서비스 범위를 명시 */}
+      <JsonLd
+        data={[
+          breadcrumb([{ name: "방문진료센터", path: "/home-visit" }]),
+          {
+            "@context": "https://schema.org",
+            "@type": "MedicalWebPage",
+            name: "장위365경희한의원 방문진료센터",
+            url: `${SITE_URL}/home-visit`,
+            inLanguage: "ko-KR",
+            about: { "@id": CLINIC_ID },
+            mainEntity: {
+              "@type": "MedicalTherapy",
+              name: "한의 방문진료",
+              description:
+                "거동이 불편해 내원이 어려운 분의 자택으로 한의사가 방문해 침·뜸 등 진료를 제공합니다. 보건복지부 일차의료 한의 방문진료 수가 시범사업 참여기관으로 건강보험(시범수가)이 적용됩니다.",
+              provider: { "@id": CLINIC_ID },
+              availableService: AREAS.filter((a) => a !== "인근 협의").map((a) => ({
+                "@type": "MedicalProcedure",
+                name: `${a} 방문진료`,
+              })),
+            },
+          },
+        ]}
+      />
       {/* 헤더 */}
       <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
