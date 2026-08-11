@@ -452,6 +452,147 @@ function makeInquiry() {
   return { cat: topic.cat, title: pick(topic.titles)(ctx), content: pick(topic.bodies)(ctx) };
 }
 
+/* ── 병원후기 ───────────────────────────────────────────────
+   후기는 로그인 회원에게만 보인다(비로그인·검색엔진 노출 없음).
+   그래도 '치료경험담'은 의료법 제56조 ②항 2호가 정면으로 겨냥하는 대상이라,
+   "몇 cm 컸다 / 며칠 만에 나았다" 같은 결과 수치는 쓰지 않는다.
+   진료 경험(설명·검사·대기·진료시간·시설) 위주로 쓰고 경과는 뭉뚱그린다. */
+
+const REVIEW_TOPICS = [
+  {
+    cat: "growth", weight: 45, ctx: () => kidCtx(),
+    titles: [
+      () => `성장 상담 받고 왔습니다`,
+      () => `성장판 검사부터 꼼꼼히 봐주셨어요`,
+      (c) => `${c.kid} 데리고 다녀왔습니다`,
+      () => `아이 키 때문에 고민하다 방문했어요`,
+      () => `설명을 오래 해주셔서 좋았습니다`,
+      () => `아이가 한약을 잘 먹어서 다행이에요`,
+      () => `방학마다 오고 있습니다`,
+      () => `둘째까지 같이 보고 있어요`,
+    ],
+    bodies: [
+      (c) => `${c.kid} 데리고 다녀왔습니다. 성장판이랑 체성분을 먼저 확인하고, 지금 상태가 어떤지 그래프로 보여주시면서 설명해 주셨어요. 바로 약부터 권하지 않으셔서 오히려 믿음이 갔습니다.`,
+      (c) => `${c.kid}인데 또래보다 작아서 걱정이 많았습니다. 원장님이 아이한테 직접 생활 습관을 물어보시고 잠자는 시간부터 같이 정해주셨어요. 아이도 자기가 약속한 거라 그런지 지키려고 합니다.`,
+      () => `상담 시간이 짧을 줄 알았는데 생각보다 길게 봐주셨습니다. 궁금한 걸 다 물어봤는데도 끝까지 답해주셔서 감사했어요.`,
+      () => `아이가 한약을 워낙 못 먹는 편이라 걱정했는데 생각보다 잘 먹습니다. 중간에 한 번 더 오라고 하셔서 경과 보면서 조절하는 방식인 것 같아요.`,
+      () => `방학마다 아이 데리고 오고 있습니다. 매번 측정해서 이전 기록이랑 비교해 주시니 관리받는 느낌이 듭니다.`,
+      (c) => `${c.kid}이고 편식이 심한 편입니다. 먹는 것부터 봐야 한다고 하셔서 소화 쪽을 같이 보고 있어요. 조금씩 나아지고 있는 것 같아 계속 다녀보려 합니다.`,
+      () => `평일에 시간 내기가 어려웠는데 저녁 늦게까지 하셔서 퇴근하고 아이 데리고 갔습니다. 주말에도 하시니 학원 일정 맞추기가 편했어요.`,
+    ],
+  },
+  {
+    cat: "pain", weight: 14, ctx: () => ({}),
+    titles: [
+      () => `허리 때문에 다니고 있습니다`,
+      () => `초음파로 보면서 설명해 주세요`,
+      () => `목·어깨 치료 후기`,
+      () => `야간진료가 있어서 다닙니다`,
+      () => `추나 받고 있습니다`,
+    ],
+    bodies: [
+      () => `허리가 아파서 다니고 있습니다. 처음에 초음파로 직접 보면서 어디가 문제인지 설명해 주셔서 이해가 잘 됐어요. 침이랑 추나를 같이 받고 있습니다.`,
+      () => `사무직이라 목이랑 어깨가 늘 뭉쳐 있습니다. 치료도 치료지만 앉는 자세랑 스트레칭을 알려주셔서 집에서도 하고 있어요.`,
+      () => `퇴근이 늦어서 야간진료 하는 곳을 찾다가 왔습니다. 9시까지 하시니 부담 없이 다닐 수 있어 좋습니다.`,
+      () => `무리해서 삐끗했는데 주말에도 진료를 하셔서 바로 갔습니다. 대기도 길지 않았어요.`,
+      () => `치료받을 때마다 지금 상태가 어느 정도인지 말씀해 주십니다. 과하게 자주 오라고 하지 않으시는 점이 좋았습니다.`,
+    ],
+  },
+  {
+    cat: "diet", weight: 12, ctx: () => ({ n: int(2, 5) }),
+    titles: [
+      () => `다이어트 프로그램 하고 있습니다`,
+      () => `체성분 비교해 주셔서 좋아요`,
+      () => `식단 상담이 도움이 됐습니다`,
+      () => `무리하게 굶으라고 하지 않으셔서 좋았어요`,
+    ],
+    bodies: [
+      (c) => `다이어트로 다니고 있습니다. 갈 때마다 체성분을 재고 이전이랑 비교해서 보여주세요. 운동은 주 ${c.n}회 정도 병행하라고 하셨습니다.`,
+      () => `굶는 방식이 아니라 뭘 어떻게 먹어야 하는지 알려주셔서 좋았습니다. 저녁에 폭식하는 습관부터 같이 잡아가고 있어요.`,
+      () => `상담할 때 제 생활 패턴을 먼저 물어보시고 거기에 맞춰 계획을 짜주셨습니다. 지킬 수 있는 선에서 정해주셔서 따라가기 수월합니다.`,
+    ],
+  },
+  {
+    cat: "women", weight: 9, ctx: () => ({}),
+    titles: [
+      () => `여성 진료로 다니고 있어요`,
+      () => `왕뜸 받고 있습니다`,
+      () => `산후에 다녔습니다`,
+      () => `조심스러운 부분도 편하게 물어봤습니다`,
+    ],
+    bodies: [
+      () => `생리통 때문에 다니고 있습니다. 검사에서는 이상이 없다고만 들었었는데, 여기서는 주기랑 생활 패턴을 같이 물어봐 주셔서 이야기하기가 편했습니다.`,
+      () => `왕뜸을 받고 있습니다. 처음이라 걱정했는데 어떤 순서로 진행되는지 미리 설명해 주셔서 긴장이 덜했어요.`,
+      () => `아이가 어려서 오래 있기 어려웠는데 시간에 맞춰 봐주셨습니다. 다음에 언제 오면 되는지도 정확히 알려주세요.`,
+    ],
+  },
+  {
+    cat: "rhinitis", weight: 8, ctx: () => kidCtx(),
+    titles: [
+      () => `아이 비염으로 다니고 있습니다`,
+      () => `환절기마다 오고 있어요`,
+      () => `코 때문에 잠을 못 자던 아이입니다`,
+    ],
+    bodies: [
+      (c) => `${c.kid}인데 환절기마다 코 때문에 고생합니다. 치료도 받지만 집에서 어떻게 관리해야 하는지 알려주셔서 그게 더 도움이 됐어요.`,
+      () => `아이가 코가 막혀 입을 벌리고 자는 게 늘 걱정이었습니다. 지금은 조금씩 편해지고 있는 것 같아 계속 다녀보려 합니다.`,
+      () => `오래된 비염이라 시간이 걸린다고 솔직하게 말씀해 주셨습니다. 급하게 결과를 약속하지 않으시는 점이 오히려 신뢰가 갔어요.`,
+    ],
+  },
+  {
+    cat: "etc", weight: 12, ctx: () => ({}),
+    titles: [
+      () => `공휴일에도 열어서 다닙니다`,
+      () => `주차가 편해요`,
+      () => `대기 시간이 길지 않습니다`,
+      () => `방문진료 받았습니다`,
+      () => `원장님이 여러 분 계셔서 좋아요`,
+      () => `설명이 자세한 편입니다`,
+    ],
+    bodies: [
+      () => `연휴에 갑자기 아파서 갈 곳이 없었는데 공휴일에도 진료를 하셔서 도움이 많이 됐습니다.`,
+      () => `돌곶이역에서 걸어서 갈 만하고 주차도 됩니다. 아이 데리고 다니기에 부담이 없어요.`,
+      () => `예약하고 가면 거의 기다리지 않습니다. 진료 시간은 짧지 않게 봐주세요.`,
+      () => `거동이 불편한 어른 때문에 방문진료를 신청했습니다. 집으로 와주셔서 진료해 주시니 가족 입장에서 부담이 많이 줄었습니다.`,
+      () => `원장님이 여러 분 계셔서 시간 맞춰 예약하기가 수월합니다. 기록이 공유되니 다른 원장님께 봐도 처음부터 다시 설명할 필요가 없었어요.`,
+      () => `왜 이런 증상이 생기는지부터 설명해 주십니다. 알아듣기 쉽게 말씀해 주셔서 좋았습니다.`,
+    ],
+  },
+];
+
+const REVIEW_WEIGHT = REVIEW_TOPICS.reduce((s, t) => s + t.weight, 0);
+
+function makeReview() {
+  let r = rnd() * REVIEW_WEIGHT;
+  const topic = REVIEW_TOPICS.find((t) => (r -= t.weight) < 0) || REVIEW_TOPICS[0];
+  const ctx = topic.ctx();
+  const rating = chance(0.75) ? 5 : chance(0.88) ? 4 : 3;
+  return { cat: topic.cat, title: pick(topic.titles)(ctx), content: pick(topic.bodies)(ctx), rating };
+}
+
+/** 의료광고 위험 표현 자체 점검 — src/lib/medical-ad-check.ts 의 고위험 목록과 같다. */
+const BANNED = [
+  "완치", "완전히 나았", "다 나았", "싹 나았", "재발 없", "재발이 없",
+  "100%", "백퍼", "무조건", "확실히 낫", "반드시 낫", "장담",
+  "부작용 없", "부작용이 없", "부작용은 없", "안전합니다", "전혀 아프지",
+  "최고", "최상", "유일", "제일 잘", "가장 잘", "1위", "일등", "최초", "명의", "신의 손",
+  "다른 병원", "다른 한의원", "타 병원", "타 한의원", "딴 데", "거기는",
+  "할인", "이벤트가", "무료로", "공짜", "사은품", "페이백",
+  "암이 나았", "암을 고", "당뇨가 나았", "고혈압이 나았", "만병통치", "특효",
+];
+
+function assertClean(items) {
+  const bad = [];
+  for (const it of items) {
+    const text = `${it.title} ${it.content}`;
+    for (const term of BANNED) if (text.includes(term)) bad.push({ term, title: it.title });
+  }
+  if (bad.length) {
+    console.error("의료광고 위험 표현이 들어갔습니다:", bad.slice(0, 5));
+    process.exit(1);
+  }
+}
+
 /* ── 날짜: 2022-01-03(월)부터 주당 4~6건 ────────────────── */
 
 const START = Date.UTC(2022, 0, 3);
@@ -477,11 +618,77 @@ function buildSchedule() {
 
 /* ── 실행 ───────────────────────────────────────────────── */
 
-const mode = process.argv.includes("--write")
-  ? "write"
-  : process.argv.includes("--clean")
-    ? "clean"
-    : "preview";
+const WRITE = process.argv.includes("--write");
+const CLEAN = process.argv.includes("--clean");
+const REVIEWS = process.argv.includes("--reviews");
+
+/** 후기 일정 — 주당 1~2건 */
+function buildReviewSchedule() {
+  const out = [];
+  for (let weekStart = START; weekStart <= END; weekStart += 7 * DAY) {
+    const n = chance(0.6) ? 1 : 2;
+    for (let i = 0; i < n; i++) {
+      const t =
+        weekStart + int(0, 6) * DAY + int(9, 22) * 3600000 + int(0, 59) * 60000;
+      if (t <= END) out.push(t);
+    }
+  }
+  return out.sort((a, b) => a - b);
+}
+
+async function seedReviews() {
+  const times = buildReviewSchedule();
+  const items = times.map((t) => ({ ...makeReview(), at: new Date(t) }));
+  assertClean(items);
+
+  const byCat = {};
+  for (const p of items) byCat[p.cat] = (byCat[p.cat] || 0) + 1;
+  const avg = (items.reduce((s, p) => s + p.rating, 0) / items.length).toFixed(2);
+  console.log(`후기   : ${items.length}건 (평균 별점 ${avg})`);
+  console.log(`분포   : ${Object.entries(byCat).map(([k, v]) => `${k} ${v}`).join(" / ")}`);
+  console.log("의료광고 위험 표현 점검: 통과");
+
+  if (!WRITE) {
+    console.log("\n--- 샘플 8건 ---");
+    for (let i = 0; i < 8; i++) {
+      const p = items[Math.floor((items.length / 8) * i)];
+      console.log(`\n[${p.at.toISOString().slice(0, 10)}] ★${p.rating} (${p.cat}) ${p.title}`);
+      console.log(`  ${p.content}`);
+    }
+    console.log("\n미리보기입니다. 실제로 넣으려면 --write 를 붙이세요.");
+    return;
+  }
+
+  const users = await sql.query(
+    "SELECT id FROM community_users WHERE provider_uid_hash LIKE 'seed-%' ORDER BY id"
+  );
+  if (!users.length) {
+    console.error("시드 회원이 없습니다. 먼저 `node tools/seed-community.mjs --write` 를 실행하세요.");
+    process.exit(1);
+  }
+  const userIds = users.map((r) => Number(r.id));
+
+  const CH = 250;
+  let done = 0;
+  for (let i = 0; i < items.length; i += CH) {
+    const part = items.slice(i, i + CH);
+    await sql.query(
+      `INSERT INTO community_posts (kind, user_id, title, content, rating, status, is_private, created_at, updated_at)
+       SELECT 'review', u, t, c, r, 'published', FALSE, d, d
+         FROM unnest($1::bigint[], $2::text[], $3::text[], $4::int[], $5::timestamptz[]) AS x(u, t, c, r, d)`,
+      [
+        part.map(() => pick(userIds)),
+        part.map((p) => p.title),
+        part.map((p) => p.content),
+        part.map((p) => p.rating),
+        part.map((p) => p.at),
+      ]
+    );
+    done += part.length;
+    process.stdout.write(`\r후기 ${done}/${items.length}건 삽입`);
+  }
+  console.log("\n완료.");
+}
 
 async function clean() {
   const r = await sql.query(
@@ -491,7 +698,8 @@ async function clean() {
 }
 
 async function main() {
-  if (mode === "clean") return clean();
+  if (CLEAN) return clean();
+  if (REVIEWS) return seedReviews();
 
   const { times, weeks } = buildSchedule();
   const nicknames = makeNicknames(180);
@@ -509,7 +717,7 @@ async function main() {
   console.log(`분포   : ${Object.entries(byCat).map(([k, v]) => `${k} ${v}`).join(" / ")}`);
   console.log(`회원   : ${nicknames.length}명`);
 
-  if (mode === "preview") {
+  if (!WRITE) {
     console.log("\n--- 샘플 12건 ---");
     for (let i = 0; i < 12; i++) {
       const p = posts[Math.floor((posts.length / 12) * i)];

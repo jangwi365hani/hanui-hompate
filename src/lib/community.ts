@@ -68,8 +68,9 @@ async function attachReplies(posts: Post[]): Promise<Post[]> {
 }
 
 /**
- * 공개 목록.
- * - review  : 승인(published)된 것만 누구에게나 보인다.
+ * 목록.
+ * - review  : 승인(published)된 글을 **로그인 회원에게만** 보여준다.
+ *             비로그인·검색엔진에는 노출하지 않는다(불특정 다수 대상 의료광고가 되지 않도록).
  * - inquiry : 비공개 1:1이라 로그인한 본인 글만 보인다. 비로그인이면 빈 목록.
  */
 export async function listPosts(
@@ -95,7 +96,10 @@ export async function listPosts(
     return attachReplies(rows.map((r) => mapPost(r, viewerId)));
   }
 
-  // 후기: 게시된 글 + (로그인했다면) 본인의 검토 중·보류 글도 함께 보여준다.
+  // 후기도 로그인해야 보인다. 비로그인이면 목록 자체를 내주지 않는다.
+  if (viewerId == null) return [];
+
+  // 게시된 글 + 본인의 검토 중·보류 글도 함께 보여준다.
   // 본인 글이 어디 갔는지 몰라 다시 쓰는 일을 막기 위한 것이다.
   const rows = await sql`
     SELECT p.*, u.nickname
@@ -131,7 +135,8 @@ export async function getPost(
   const canRead =
     isAdmin ||
     post.isMine ||
-    (post.kind === "review" && post.status === "published");
+    // 후기 상세도 로그인 회원에게만 — 목록과 같은 기준
+    (post.kind === "review" && post.status === "published" && viewerId != null);
   if (!canRead) return null;
 
   const [withReplies] = await attachReplies([post]);

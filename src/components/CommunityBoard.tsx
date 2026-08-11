@@ -17,7 +17,7 @@ const TABS: { kind: PostKind; label: string; desc: string }[] = [
   {
     kind: "review",
     label: "병원후기",
-    desc: "진료를 받으신 경험을 남겨주세요. 확인 후 게시됩니다.",
+    desc: "진료를 받으신 경험을 남겨주세요. 확인 후 게시되며, 로그인한 회원에게만 보입니다.",
   },
   {
     kind: "inquiry",
@@ -297,9 +297,16 @@ export default function CommunityBoard() {
         </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-20 text-gray-400 text-sm">
-          {tab === "inquiry" && !loggedIn
-            ? "로그인하시면 내가 남긴 문의와 답변을 확인할 수 있습니다."
-            : "아직 등록된 글이 없습니다. 첫 글을 남겨보세요."}
+          {!loggedIn ? (
+            <span className="inline-flex flex-col items-center gap-2">
+              <Lock size={22} className="text-gray-300" />
+              {tab === "review"
+                ? "후기는 로그인한 회원에게만 보입니다. 위에서 카카오·네이버로 로그인해 주세요."
+                : "로그인하시면 내가 남긴 문의와 답변을 확인할 수 있습니다."}
+            </span>
+          ) : (
+            "아직 등록된 글이 없습니다. 첫 글을 남겨보세요."
+          )}
         </div>
       ) : (
         <ul className="space-y-4">
