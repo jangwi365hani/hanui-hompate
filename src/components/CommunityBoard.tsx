@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import {
-  Star, Lock, MessageSquare, PenLine, LogOut, ShieldCheck, Loader2, X, Trash2, AlertCircle,
+  Star, Lock, MessageSquare, PenLine, LogOut, ShieldCheck, Loader2, X, Trash2, AlertCircle, ChevronDown,
 } from "lucide-react";
 import type { Post, PostKind } from "@/lib/community-types";
 import { AD_NOTICE, checkAdRisk } from "@/lib/medical-ad-check";
@@ -51,6 +51,9 @@ function Stars({ n, size = 15 }: { n: number; size?: number }) {
 export default function CommunityBoard() {
   const [tab, setTab] = useState<PostKind>("inquiry");
   const [posts, setPosts] = useState<Post[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -92,16 +95,26 @@ export default function CommunityBoard() {
     }
   }, []);
 
-  const loadPosts = useCallback(async (kind: PostKind) => {
-    setLoading(true);
+  /**
+   * 목록 조회. 한 번에 20건씩 내려오므로 page 를 올려가며 이어 붙인다.
+   * append=false 면 처음부터 다시 그린다(탭 전환·글 등록 후).
+   */
+  const loadPosts = useCallback(async (kind: PostKind, nextPage = 0, append = false) => {
+    if (append) setLoadingMore(true);
+    else setLoading(true);
     try {
-      const r = await fetch(`/api/community/posts?kind=${kind}`, { cache: "no-store" });
+      const r = await fetch(`/api/community/posts?kind=${kind}&page=${nextPage}`, { cache: "no-store" });
       const d = await r.json();
-      setPosts(Array.isArray(d.posts) ? d.posts : []);
+      const list: Post[] = Array.isArray(d.posts) ? d.posts : [];
+      setPosts((prev) => (append ? [...prev, ...list] : list));
+      setHasMore(Boolean(d.hasMore));
+      setPage(nextPage);
     } catch {
-      setPosts([]);
+      if (!append) setPosts([]);
+      setHasMore(false);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, []);
 
@@ -109,8 +122,9 @@ export default function CommunityBoard() {
     loadSession();
   }, [loadSession]);
 
+  // 탭을 바꾸거나 로그인 상태가 달라지면 첫 페이지부터 다시 그린다.
   useEffect(() => {
-    loadPosts(tab);
+    loadPosts(tab, 0, false);
   }, [tab, loggedIn, loadPosts]);
 
   const logout = async () => {
@@ -159,7 +173,7 @@ export default function CommunityBoard() {
           ? "등록되었습니다. 확인 후 게시됩니다."
           : "문의가 접수되었습니다. 확인 후 답변드리겠습니다."
       );
-      loadPosts(tab);
+      loadPosts(tab, 0, false);
     } catch {
       showMsg("등록 중 오류가 발생했습니다.");
     } finally {
@@ -171,7 +185,7 @@ export default function CommunityBoard() {
     const r = await fetch(`/api/community/posts/${id}`, { method: "DELETE" });
     if (r.ok) {
       showMsg("삭제되었습니다.");
-      loadPosts(tab);
+      loadPosts(tab, 0, false);
     } else {
       showMsg("삭제하지 못했습니다.");
     }
@@ -398,6 +412,26 @@ export default function CommunityBoard() {
             </li>
           ))}
         </ul>
+      )}
+
+      {/* 더 보기 — 한 번에 20건씩 이어 붙인다 */}
+      {!loading && hasMore && (
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <button
+            onClick={() => loadPosts(tab, page + 1, true)}
+            disabled={loadingMore}
+            className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-6 py-3 text-sm font-semibold text-gray-600 transition hover:border-[#8B1A2B] hover:text-[#8B1A2B] disabled:opacity-60"
+          >
+            {loadingMore ? <Loader2 size={15} className="animate-spin" /> : <ChevronDown size={15} />}
+            {loadingMore ? "불러오는 중" : "더 보기"}
+          </button>
+          <p className="text-xs text-gray-400">{posts.length}개 표시 중</p>
+        </div>
+      )}
+      {!loading && !hasMore && posts.length > 20 && (
+        <p className="mt-6 text-center text-xs text-gray-400">
+          전체 {posts.length}개를 모두 불러왔습니다.
+        </p>
       )}
 
       {/* 작성 모달 */}
