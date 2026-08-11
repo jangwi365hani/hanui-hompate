@@ -77,8 +77,10 @@ export default function ConsultBar() {
     }
   };
 
+  // 폭은 쓰는 곳에서 정한다 — 여기에 w-full 을 넣으면 데스크톱의 w-36/w-32 와
+  // 같은 우선순위로 충돌해 한 줄 배치가 깨진다.
   const field =
-    "w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#8B1A2B] focus:outline-none focus:ring-1 focus:ring-[#8B1A2B]/30";
+    "rounded-lg border border-gray-200 px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-[#8B1A2B] focus:outline-none focus:ring-1 focus:ring-[#8B1A2B]/30";
 
   const agreeRow = (
     <label className="flex items-start gap-2 text-[11px] leading-snug text-gray-500 cursor-pointer">
@@ -124,22 +126,22 @@ export default function ConsultBar() {
             </div>
 
             <div className="flex flex-col gap-2.5">
-              <select value={subject} onChange={(e) => setSubject(e.target.value)} className={field}>
+              <select value={subject} onChange={(e) => setSubject(e.target.value)} className={`${field} w-full`}>
                 <option value="">진료 과목 선택</option>
                 {SUBJECTS.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
-              <input className={field} placeholder="이름" value={name} onChange={(e) => setName(e.target.value)} />
+              <input className={`${field} w-full`} placeholder="이름" value={name} onChange={(e) => setName(e.target.value)} />
               <input
-                className={field}
+                className={`${field} w-full`}
                 placeholder="연락처 (숫자만)"
                 inputMode="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
               <textarea
-                className={`${field} h-24 resize-none`}
+                className={`${field} w-full h-24 resize-none`}
                 placeholder="문의 내용 (선택)"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
@@ -207,7 +209,7 @@ export default function ConsultBar() {
             aria-label="연락처"
           />
           <input
-            className={field}
+            className={`${field} min-w-0 flex-1`}
             placeholder="문의 내용 (선택)"
             value={message}
             onChange={(e) => setMessage(e.target.value)}

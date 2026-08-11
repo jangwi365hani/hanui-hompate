@@ -809,7 +809,8 @@ export default function Home() {
       />
 
       {/* 우측 플로팅 버튼 (스크롤 따라 고정) — 쏙쏙다이어트 → 방문진료 → 카카오 문의 순 */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+      {/* 하단 고정 상담바 위로 올린다 — 겹치면 버튼이 눌리지 않는다 */}
+      <div className="fixed bottom-[calc(var(--consultbar-h)+1rem)] right-6 z-50 flex flex-col items-end gap-3">
         {/* 다이어트 브랜드 사이트 — 별도 도메인이라 새 탭으로 연다 */}
         <a
           href="https://ssoksokdiet.com"

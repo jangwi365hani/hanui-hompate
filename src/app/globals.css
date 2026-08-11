@@ -6,11 +6,20 @@
   /* 최상단 고정 띠배너(TopUpdateBar) 높이.
      body 여백과 각 페이지 sticky 헤더의 top 이 이 값을 함께 따라간다. */
   --topbar-h: 2.5rem;
+  /* 하단 고정 상담신청 바(ConsultBar) 높이.
+     body 아래 여백과 메인 플로팅 버튼의 bottom 이 이 값을 따라간다. */
+  --consultbar-h: 4.25rem;
 }
 
 @media (min-width: 640px) {
   :root {
     --topbar-h: 2.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --consultbar-h: 4.75rem;
   }
 }
 
@@ -26,8 +35,9 @@
    글이 안 보이는 문제). 이 사이트는 밝은 화면 하나로 간다. */
 
 body {
-  /* 고정 띠배너가 차지하는 자리를 비워 둔다 */
+  /* 위·아래 고정 바가 차지하는 자리를 비워 둔다 */
   padding-top: var(--topbar-h);
+  padding-bottom: var(--consultbar-h);
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-pretendard), -apple-system, "Apple SD Gothic Neo", sans-serif;

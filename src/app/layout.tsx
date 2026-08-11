@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import TopUpdateBar from "@/components/TopUpdateBar";
+import ConsultBar from "@/components/ConsultBar";
 
 /**
  * 본문 글꼴 — Pretendard.
@@ -139,6 +140,7 @@ export default function RootLayout({
         />
         <TopUpdateBar />
         {children}
+        <ConsultBar />
       </body>
     </html>
   );
