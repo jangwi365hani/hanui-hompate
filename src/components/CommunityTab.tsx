@@ -15,10 +15,11 @@ interface Props {
   pw: string;
 }
 
+// 환자 화면(CommunityBoard)의 탭 순서와 맞춘다 — 상담문의 먼저, 후기 뒤.
 const FILTERS: { key: PostKind | "all"; label: string }[] = [
   { key: "all", label: "전체" },
-  { key: "review", label: "병원후기" },
   { key: "inquiry", label: "상담문의" },
+  { key: "review", label: "병원후기" },
 ];
 
 const STATUS_STYLE: Record<PostStatus, string> = {
