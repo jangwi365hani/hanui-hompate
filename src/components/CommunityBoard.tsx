@@ -13,16 +13,18 @@ interface Ready {
   naver: boolean;
 }
 
+// 탭 순서 = 화면 순서. 상담문의를 앞에 둔다 —
+// 비로그인 방문자도 제목을 볼 수 있는 쪽이라 첫 화면이 비어 보이지 않는다.
 const TABS: { kind: PostKind; label: string; desc: string }[] = [
-  {
-    kind: "review",
-    label: "병원후기",
-    desc: "진료를 받으신 경험을 남겨주세요. 확인 후 게시되며, 로그인한 회원에게만 보입니다.",
-  },
   {
     kind: "inquiry",
     label: "상담문의",
     desc: "증상·치료·예약 관련 문의를 남겨주세요. 제목은 다른 분들께도 보이고, 내용과 답변은 작성자 본인과 병원만 볼 수 있습니다.",
+  },
+  {
+    kind: "review",
+    label: "병원후기",
+    desc: "진료를 받으신 경험을 남겨주세요. 확인 후 게시되며, 로그인한 회원에게만 보입니다.",
   },
 ];
 
@@ -47,7 +49,7 @@ function Stars({ n, size = 15 }: { n: number; size?: number }) {
 }
 
 export default function CommunityBoard() {
-  const [tab, setTab] = useState<PostKind>("review");
+  const [tab, setTab] = useState<PostKind>("inquiry");
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
