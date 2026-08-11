@@ -108,6 +108,28 @@ async function runMigrations() {
   `;
   await q`CREATE INDEX IF NOT EXISTS community_replies_post_idx
             ON community_replies (post_id, created_at)`;
+
+  // 상담신청 — 화면 하단 고정 폼으로 들어온다.
+  //   커뮤니티와 달리 로그인 없이 **이름·연락처를 직접 받는다.** 그래서
+  //   ① 개인정보처리방침(src/app/privacy/page.tsx)에 수집 항목이 적혀 있어야 하고
+  //   ② 회신이 끝나면 지체 없이 지운다(관리자 화면의 삭제 버튼 = 실제 DELETE).
+  //   상태를 'done'으로 바꾸는 것만으로는 개인정보가 남아 있으니 파기가 아니다.
+  await q`
+    CREATE TABLE IF NOT EXISTS consult_requests (
+      id         BIGSERIAL PRIMARY KEY,
+      subject    TEXT NOT NULL DEFAULT '',
+      name       TEXT NOT NULL,
+      phone      TEXT NOT NULL,
+      message    TEXT NOT NULL DEFAULT '',
+      status     TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new','done','spam')),
+      memo       TEXT NOT NULL DEFAULT '',
+      source     TEXT NOT NULL DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      handled_at TIMESTAMPTZ
+    )
+  `;
+  await q`CREATE INDEX IF NOT EXISTS consult_requests_list_idx
+            ON consult_requests (status, created_at DESC)`;
 }
 
 /** 모든 커뮤니티 API가 쿼리 전에 한 번 호출한다. 프로세스당 1회만 실제로 실행된다. */

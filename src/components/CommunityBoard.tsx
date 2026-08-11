@@ -336,6 +336,11 @@ export default function CommunityBoard() {
                       게시 보류
                     </span>
                   )}
+                  {p.kind === "inquiry" && p.locked && (p.replyCount ?? 0) > 0 && (
+                    <span className="text-[11px] font-semibold text-[#8B1A2B] bg-[#faf5f6] border border-[#e9d6da] rounded-full px-2.5 py-1">
+                      답변완료
+                    </span>
+                  )}
                   {p.kind === "inquiry" && (
                     <span className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 bg-gray-100 rounded-full px-2.5 py-1">
                       <Lock size={11} /> 비공개
@@ -353,9 +358,15 @@ export default function CommunityBoard() {
                 </div>
               </div>
 
-              <p className="text-gray-700 text-[15px] leading-relaxed whitespace-pre-line break-words">
-                {p.content}
-              </p>
+              {p.locked ? (
+                <p className="flex items-center gap-1.5 text-gray-400 text-sm">
+                  <Lock size={13} /> 작성자 본인만 볼 수 있는 글입니다.
+                </p>
+              ) : (
+                <p className="text-gray-700 text-[15px] leading-relaxed whitespace-pre-line break-words">
+                  {p.content}
+                </p>
+              )}
 
               {p.status === "rejected" && p.rejectMemo && (
                 <p className="mt-3 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 leading-relaxed">

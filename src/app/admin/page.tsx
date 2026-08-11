@@ -6,6 +6,7 @@ import { upload } from "@vercel/blob/client";
 import HandoverTab from "@/components/HandoverTab";
 import WikiTab from "@/components/WikiTab";
 import CommunityTab from "@/components/CommunityTab";
+import ConsultTab from "@/components/ConsultTab";
 import RichEditor from "@/components/RichEditor";
 
 interface Event {
@@ -59,7 +60,7 @@ export default function AdminPage() {
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState("");
 
-  const [tab, setTab] = useState<"events" | "columns" | "doctors" | "popup" | "handover" | "wiki" | "holidays" | "community">("events");
+  const [tab, setTab] = useState<"events" | "columns" | "doctors" | "popup" | "handover" | "wiki" | "holidays" | "community" | "consult">("events");
   const [events, setEvents] = useState<Event[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
   const [editingColumn, setEditingColumn] = useState<Partial<Column> | null>(null);
@@ -568,6 +569,19 @@ export default function AdminPage() {
               }`}
             >
               커뮤니티
+            </button>
+          )}
+          {/* 상담신청은 이름·연락처를 다루므로 커뮤니티와 같이 대표원장 비밀번호로만 연다 */}
+          {loginRole === "doc" && (
+            <button
+              onClick={() => setTab("consult")}
+              className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+                tab === "consult"
+                  ? "border-[#8B1A2B] text-[#8B1A2B]"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              상담신청
             </button>
           )}
           <button
@@ -1220,6 +1234,7 @@ export default function AdminPage() {
 
         {/* ── 커뮤니티 탭 ── */}
         {tab === "community" && <CommunityTab pw={pw} />}
+        {tab === "consult" && <ConsultTab pw={pw} />}
 
         {/* ── 팝업 탭 ── */}
         {tab === "popup" && (

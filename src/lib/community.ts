@@ -83,17 +83,37 @@ export async function listPosts(
 
   if (kind === "inquiry") {
     if (viewerId == null) return [];
+
+    // 상담문의는 비밀글 게시판처럼 동작한다 —
+    // **제목·작성자·날짜·답변 여부는 회원 모두에게** 보이고,
+    // **본문과 답변 내용은 작성자 본인(과 관리자)에게만** 보인다.
+    // 다른 환자도 "나만 이런 고민이 아니구나"를 보게 하되 사생활은 지키기 위한 절충이다.
     const rows = await sql`
-      SELECT p.*, u.nickname
+      SELECT p.*, u.nickname,
+             (SELECT count(*) FROM community_replies r WHERE r.post_id = p.id) AS reply_count
         FROM community_posts p
         JOIN community_users u ON u.id = p.user_id
        WHERE p.kind = 'inquiry'
-         AND p.user_id = ${viewerId}
          AND p.deleted_at IS NULL
        ORDER BY p.created_at DESC
        LIMIT ${limit} OFFSET ${offset}
     `;
-    return attachReplies(rows.map((r) => mapPost(r, viewerId)));
+
+    const posts = rows.map((r) => {
+      const post = mapPost(r, viewerId);
+      post.replyCount = Number(r.reply_count ?? 0);
+      if (!post.isMine) {
+        // 남의 글은 본문을 아예 내려보내지 않는다(화면에서 가리는 것으로는 부족하다).
+        post.content = "";
+        post.locked = true;
+      }
+      return post;
+    });
+
+    // 답변 본문도 내 글에만 붙인다.
+    const mine = posts.filter((p) => p.isMine);
+    await attachReplies(mine);
+    return posts;
   }
 
   // 후기도 로그인해야 보인다. 비로그인이면 목록 자체를 내주지 않는다.

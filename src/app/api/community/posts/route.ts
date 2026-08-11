@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/community-session";
 import { listPosts } from "@/lib/community";
 import { sql, ensureSchema, DbNotConfiguredError } from "@/lib/db";
+import { autoReplyToInquiry } from "@/lib/auto-reply";
 import type { PostKind } from "@/lib/community-types";
 
 const KINDS: PostKind[] = ["review", "inquiry"];
@@ -100,7 +101,15 @@ export async function POST(req: Request) {
            VALUES (${kind}, ${session.uid}, ${title}, ${content}, ${rating}, ${status}, ${isPrivate})
         RETURNING id
     `;
-    return NextResponse.json({ id: Number(rows[0].id), status });
+    const id = Number(rows[0].id);
+
+    // 상담문의에는 자동 1차 안내를 단다. 실패해도 글 등록은 성공으로 처리한다.
+    // (Vercel 함수는 응답 후 작업을 보장하지 않으므로 여기서 기다린다 — 보통 2~4초)
+    if (kind === "inquiry") {
+      await autoReplyToInquiry(id, title, content);
+    }
+
+    return NextResponse.json({ id, status });
   } catch (e) {
     return dbError(e);
   }

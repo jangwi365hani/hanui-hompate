@@ -58,12 +58,22 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
                 </td>
                 <td className="border border-gray-200 px-4 py-2.5">이용자가 글을 등록한 때</td>
               </tr>
+              <tr>
+                <td className="border border-gray-200 px-4 py-2.5">상담신청</td>
+                <td className="border border-gray-200 px-4 py-2.5">
+                  이름, 연락처(휴대전화번호), 진료 과목, 문의 내용, 신청 일시
+                </td>
+                <td className="border border-gray-200 px-4 py-2.5">
+                  이용자가 화면 하단의 상담신청 양식에 직접 입력하고 동의한 때
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
         <p className="mt-4">
           <strong className="text-gray-800">
-            이름, 이메일 주소, 전화번호, 생년월일, 성별, 프로필 사진은 수집하지 않습니다.
+            커뮤니티(후기·상담문의)에서는 이름, 이메일 주소, 전화번호, 생년월일, 성별, 프로필 사진을
+            수집하지 않습니다. 이름과 연락처는 상담신청을 하신 경우에만 수집합니다.
           </strong>{" "}
           카카오·네이버로부터 회원을 구분하기 위해 전달받는 회원 식별값은 원래의 값을 저장하지 않고
           복원이 불가능한 형태(해시)로 변환하여 보관합니다.
@@ -82,6 +92,7 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
         <li>커뮤니티 회원 식별 및 로그인 상태 유지</li>
         <li>이용자가 작성한 후기·상담문의의 게시와 본인 확인</li>
         <li>상담문의에 대한 답변 제공</li>
+        <li>상담신청에 대한 전화 회신 및 진료 예약 안내</li>
         <li>중복·도배 게시물 방지 등 커뮤니티 운영 관리</li>
       </ul>
     ),
@@ -96,6 +107,10 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
         </p>
         <ul className="list-disc pl-5 space-y-1.5 mt-3">
           <li>회원 정보: 이용자가 삭제를 요청하거나 서비스 종료 시까지</li>
+          <li>
+            상담신청 정보(이름·연락처·문의 내용): 회신이 완료되면 지체 없이 파기하며, 늦어도 접수일로부터
+            3개월 이내에 파기합니다
+          </li>
           <li>
             이용자가 작성한 게시글: 이용자가 삭제한 시점부터 30일 이내 파기 (상담 답변 이력 확인 및
             분쟁 대응을 위해 일정 기간 보관 후 삭제)
