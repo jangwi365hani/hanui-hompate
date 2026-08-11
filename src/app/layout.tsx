@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import TopUpdateBar from "@/components/TopUpdateBar";
 
 /**
  * 본문 글꼴 — Pretendard.
@@ -136,6 +137,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <TopUpdateBar />
         {children}
       </body>
     </html>

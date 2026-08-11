@@ -73,7 +73,7 @@ export default function HomeVisitPage() {
         ]}
       />
       {/* 헤더 */}
-      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
+      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-[var(--topbar-h)] z-50 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/" className="text-gray-500 hover:text-gray-900 transition"><ArrowLeft size={22} /></Link>

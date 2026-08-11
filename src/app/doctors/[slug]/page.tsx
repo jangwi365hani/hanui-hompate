@@ -48,7 +48,7 @@ export default async function DoctorPage({ params }: { params: Promise<{ slug: s
         ]}
       />
       {/* 헤더 */}
-      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
+      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-[var(--topbar-h)] z-50 border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-gray-500 hover:text-[#8B1A2B] transition-colors text-sm font-medium">
             <ChevronLeft size={16} /> 홈으로

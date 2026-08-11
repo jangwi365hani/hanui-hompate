@@ -246,7 +246,7 @@ export default function Home() {
       <ScrollReveal />
 
       {/* 헤더 */}
-      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
+      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-[var(--topbar-h)] z-50 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3">
             <Image src="/images/logo.png" alt="장위365경희한의원 로고" width={288} height={96} className="object-contain h-24 w-auto" />
