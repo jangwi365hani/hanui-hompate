@@ -5,6 +5,7 @@ import { Plus, Trash2, Edit2, Eye, EyeOff, Save, LogOut, Bell, BellOff, Upload, 
 import { upload } from "@vercel/blob/client";
 import HandoverTab from "@/components/HandoverTab";
 import WikiTab from "@/components/WikiTab";
+import CommunityTab from "@/components/CommunityTab";
 import RichEditor from "@/components/RichEditor";
 
 interface Event {
@@ -58,7 +59,7 @@ export default function AdminPage() {
   const [pwInput, setPwInput] = useState("");
   const [pwError, setPwError] = useState("");
 
-  const [tab, setTab] = useState<"events" | "columns" | "doctors" | "popup" | "handover" | "wiki" | "holidays">("events");
+  const [tab, setTab] = useState<"events" | "columns" | "doctors" | "popup" | "handover" | "wiki" | "holidays" | "community">("events");
   const [events, setEvents] = useState<Event[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
   const [editingColumn, setEditingColumn] = useState<Partial<Column> | null>(null);
@@ -554,6 +555,19 @@ export default function AdminPage() {
               }`}
             >
               칼럼 관리
+            </button>
+          )}
+          {/* 커뮤니티 승인은 의료광고 책임이 걸린 판단이라 대표원장 비밀번호로만 연다 */}
+          {loginRole === "doc" && (
+            <button
+              onClick={() => setTab("community")}
+              className={`py-3 px-5 text-sm font-medium border-b-2 transition ${
+                tab === "community"
+                  ? "border-[#8B1A2B] text-[#8B1A2B]"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              커뮤니티
             </button>
           )}
           <button
@@ -1203,6 +1217,9 @@ export default function AdminPage() {
 
         {/* ── 위키 탭 ── */}
         {tab === "wiki" && <WikiTab pw={pw} />}
+
+        {/* ── 커뮤니티 탭 ── */}
+        {tab === "community" && <CommunityTab pw={pw} />}
 
         {/* ── 팝업 탭 ── */}
         {tab === "popup" && (

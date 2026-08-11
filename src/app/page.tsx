@@ -11,6 +11,14 @@ import PopupBanner from "@/components/PopupBanner";
 import ReviewsSection from "@/components/ReviewsSection";
 import ScrollReveal from "@/components/ScrollReveal";
 import CountUp from "@/components/CountUp";
+import { findClinicByTitle, clinicPath } from "@/lib/clinics";
+
+// 진료과목 카드 제목 → 클리닉 상세 페이지 주소.
+// 아직 페이지가 없는 클리닉은 예전처럼 진료과목 섹션으로 보낸다.
+function clinicHref(title: string) {
+  const clinic = findClinicByTitle(title);
+  return clinic?.ready ? clinicPath(clinic.slug) : "#services";
+}
 
 // primary=true 만 데스크톱 상단 내비에 노출(혼잡 완화). 나머지는 모바일 메뉴·푸터에서 접근.
 const NAV_LINKS = [
@@ -26,6 +34,7 @@ const NAV_LINKS = [
   { label: "자주 묻는 질문", href: "#faq", primary: false },
   { label: "이벤트", href: "/events", primary: true },
   { label: "건강칼럼", href: "/columns", primary: true },
+  { label: "커뮤니티", href: "/community", primary: true },
 ];
 
 // 개원(2021-08-01)부터 5주년까지 실제 진료 기록 집계 — 2021-08-01 ~ 2026-07-31
@@ -417,7 +426,8 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {SYMPTOMS.map(({ Icon, title, tags, clinic }) => (
-              <a key={title} href="#services" className="group bg-gray-50 rounded-2xl p-7 border border-gray-100 hover:border-[#e8b4bb] hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
+              // 해당 클리닉 페이지가 있으면 그리로, 없으면 예전처럼 진료과목 섹션으로 보낸다
+              <a key={title} href={clinicHref(clinic)} className="group bg-gray-50 rounded-2xl p-7 border border-gray-100 hover:border-[#e8b4bb] hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
                 <div className="w-14 h-14 bg-[#fdf3f4] rounded-2xl flex items-center justify-center mb-5 group-hover:bg-[#fae6e8] transition-colors">
                   <Icon size={26} className="text-[#8B1A2B]" />
                 </div>
@@ -444,13 +454,21 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {SERVICES.map(({ Icon, title, desc }) => (
-              <div key={title} className="group bg-white rounded-2xl p-8 border border-gray-100 hover:border-[#e8b4bb] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
+              // 카드 전체가 해당 클리닉 상세 페이지로 가는 링크다
+              <a
+                key={title}
+                href={clinicHref(title)}
+                className="group bg-white rounded-2xl p-8 border border-gray-100 hover:border-[#e8b4bb] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+              >
                 <div className="w-12 h-12 bg-[#fdf3f4] rounded-xl flex items-center justify-center mb-5 group-hover:bg-[#fae6e8] transition-colors">
                   <Icon size={22} className="text-[#8B1A2B]" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#8B1A2B] transition-colors">{title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
-              </div>
+                <span className="mt-5 inline-flex items-center gap-1 text-[13px] font-bold text-[#8B1A2B] opacity-0 group-hover:opacity-100 transition-opacity">
+                  자세히 보기 <ChevronRight size={14} />
+                </span>
+              </a>
             ))}
           </div>
         </div>
@@ -840,6 +858,8 @@ export default function Home() {
               {NAV_LINKS.map((l) => (
                 <a key={l.href} href={l.href} className="hover:text-white transition-colors">{l.label}</a>
               ))}
+              {/* 개인정보 수집(커뮤니티 로그인)이 있으므로 방침 링크는 상시 노출한다 */}
+              <a href="/privacy" className="hover:text-white transition-colors">개인정보처리방침</a>
             </nav>
             <p className="text-xs">© 2026 장위365경희한의원. All rights reserved.</p>
           </div>

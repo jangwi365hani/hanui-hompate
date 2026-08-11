@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getColumns, getDoctors } from "@/lib/data";
+import { readyClinics, clinicPath } from "@/lib/clinics";
 
 const SITE_URL = "https://jangwi365.com";
 
@@ -13,6 +14,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/home-visit`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/columns`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${SITE_URL}/events`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${SITE_URL}/community`, lastModified: now, changeFrequency: "daily", priority: 0.6 },
+    { url: `${SITE_URL}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
+    // 클리닉 상세 — 증상 키워드 검색에서 실제로 인용될 본문이 있는 주소들이라 색인이 중요하다
+    ...readyClinics().map((c) => ({
+      url: `${SITE_URL}${clinicPath(c.slug)}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
   ];
 
   // 개별 칼럼·원장 페이지 — 검색·챗봇이 인용할 실제 본문이 있는 주소들이라 색인이 중요하다.
