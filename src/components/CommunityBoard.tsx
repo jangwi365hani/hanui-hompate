@@ -54,6 +54,8 @@ export default function CommunityBoard() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  // 비로그인 상태에서 후기가 몇 개 쌓여 있는지 (내용은 서버가 안 내려준다)
+  const [reviewCount, setReviewCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -108,6 +110,7 @@ export default function CommunityBoard() {
       const list: Post[] = Array.isArray(d.posts) ? d.posts : [];
       setPosts((prev) => (append ? [...prev, ...list] : list));
       setHasMore(Boolean(d.hasMore));
+      setReviewCount(typeof d.count === "number" ? d.count : null);
       setPage(nextPage);
     } catch {
       if (!append) setPosts([]);
@@ -311,14 +314,62 @@ export default function CommunityBoard() {
         <div className="flex justify-center py-20 text-gray-300">
           <Loader2 className="animate-spin" size={28} />
         </div>
+      ) : tab === "review" && !loggedIn ? (
+        /* 후기 잠금 화면 — 내용은 서버가 아예 안 내려주므로, 뒤에 쌓인 느낌만
+           흐릿한 자리표시 카드로 보여주고 그 위에 로그인 안내를 얹는다. */
+        <div className="relative">
+          <div aria-hidden className="select-none blur-[5px] opacity-70 space-y-4 pointer-events-none">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <div className="mb-2">
+                  <Stars n={i === 3 ? 4 : 5} />
+                </div>
+                <div className="h-3.5 w-2/5 rounded bg-gray-200" />
+                <div className="mt-3 space-y-2">
+                  <div className="h-3 w-full rounded bg-gray-100" />
+                  <div className="h-3 w-11/12 rounded bg-gray-100" />
+                  <div className="h-3 w-3/5 rounded bg-gray-100" />
+                </div>
+                <div className="mt-4 h-2.5 w-24 rounded bg-gray-100" />
+              </div>
+            ))}
+          </div>
+
+          {/* 아래로 갈수록 하얗게 — 더 쌓여 있는 것처럼 보이게 */}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-gray-50" />
+
+          <div className="absolute inset-0 flex items-start justify-center pt-24">
+            <div className="mx-4 max-w-sm rounded-2xl border border-gray-200 bg-white/95 px-6 py-6 text-center shadow-lg backdrop-blur-sm">
+              <Lock size={22} className="mx-auto text-[#8B1A2B]" />
+              <p className="mt-3 text-[15px] font-bold text-gray-900">
+                {reviewCount != null && reviewCount > 0
+                  ? `${reviewCount.toLocaleString()}개의 후기가 있습니다`
+                  : "등록된 후기가 있습니다"}
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
+                후기는 로그인한 회원에게만 보입니다.
+                <br />
+                카카오·네이버로 로그인하고 확인해 보세요.
+              </p>
+              <a
+                href="#community-login"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="mt-4 inline-block rounded-full bg-[#8B1A2B] px-6 py-2.5 text-sm font-bold text-white transition hover:bg-[#7A1626]"
+              >
+                로그인하고 후기 보기
+              </a>
+            </div>
+          </div>
+        </div>
       ) : posts.length === 0 ? (
         <div className="text-center py-20 text-gray-400 text-sm">
           {!loggedIn ? (
             <span className="inline-flex flex-col items-center gap-2">
               <Lock size={22} className="text-gray-300" />
-              {tab === "review"
-                ? "후기는 로그인한 회원에게만 보입니다. 위에서 카카오·네이버로 로그인해 주세요."
-                : "로그인하시면 내가 남긴 문의와 답변을 확인할 수 있습니다."}
+              로그인하시면 내가 남긴 문의와 답변을 확인할 수 있습니다.
             </span>
           ) : (
             "아직 등록된 글이 없습니다. 첫 글을 남겨보세요."

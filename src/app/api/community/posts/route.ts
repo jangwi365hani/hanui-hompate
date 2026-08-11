@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/community-session";
-import { listPosts } from "@/lib/community";
+import { listPosts, countPublishedReviews } from "@/lib/community";
 import { sql, ensureSchema, DbNotConfiguredError } from "@/lib/db";
 import { autoReplyToInquiry } from "@/lib/auto-reply";
 import type { PostKind } from "@/lib/community-types";
@@ -31,9 +31,16 @@ export async function GET(req: Request) {
 
   try {
     const session = await getSession();
-    const posts = await listPosts(kind, session?.uid ?? null, limit, page * limit);
+    const viewerId = session?.uid ?? null;
+    const posts = await listPosts(kind, viewerId, limit, page * limit);
+
+    // 후기는 로그인해야 보인다. 대신 몇 개가 쌓여 있는지는 알려준다 —
+    // 화면이 흐릿한 미리보기 뒤에 이 숫자를 띄운다.
+    const count =
+      kind === "review" && viewerId == null ? await countPublishedReviews() : undefined;
+
     return NextResponse.json(
-      { posts, hasMore: posts.length === limit },
+      { posts, hasMore: posts.length === limit, ...(count != null ? { count } : {}) },
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch (e) {

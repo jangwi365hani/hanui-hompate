@@ -147,6 +147,21 @@ export async function listPosts(
   return attachReplies(rows.map((r) => mapPost(r, viewerId)));
 }
 
+/**
+ * 게시된 후기 개수.
+ * 비로그인 화면의 "후기 N개" 안내에 쓴다 — 내용은 안 내주지만 몇 개가 있는지는 알려준다.
+ * (개수까지 감추면 로그인할 이유를 알 수 없다)
+ */
+export async function countPublishedReviews(): Promise<number> {
+  await ensureSchema();
+  const rows = await sql`
+    SELECT count(*)::int AS n
+      FROM community_posts
+     WHERE kind = 'review' AND status = 'published' AND deleted_at IS NULL
+  `;
+  return Number(rows[0]?.n ?? 0);
+}
+
 /** 상세 조회. 볼 권한이 없으면 null. */
 export async function getPost(
   id: number,
