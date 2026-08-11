@@ -54,8 +54,6 @@ export default function CommunityBoard() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  // 비로그인 상태에서 후기가 몇 개 쌓여 있는지 (내용은 서버가 안 내려준다)
-  const [reviewCount, setReviewCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
   const [nickname, setNickname] = useState("");
@@ -110,7 +108,6 @@ export default function CommunityBoard() {
       const list: Post[] = Array.isArray(d.posts) ? d.posts : [];
       setPosts((prev) => (append ? [...prev, ...list] : list));
       setHasMore(Boolean(d.hasMore));
-      setReviewCount(typeof d.count === "number" ? d.count : null);
       setPage(nextPage);
     } catch {
       if (!append) setPosts([]);
@@ -342,9 +339,7 @@ export default function CommunityBoard() {
             <div className="mx-4 max-w-sm rounded-2xl border border-gray-200 bg-white/95 px-6 py-6 text-center shadow-lg backdrop-blur-sm">
               <Lock size={22} className="mx-auto text-[#8B1A2B]" />
               <p className="mt-3 text-[15px] font-bold text-gray-900">
-                {reviewCount != null && reviewCount > 0
-                  ? `${reviewCount.toLocaleString()}개의 후기가 있습니다`
-                  : "등록된 후기가 있습니다"}
+                진료를 받으신 분들의 후기
               </p>
               <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
                 후기는 로그인한 회원에게만 보입니다.
@@ -388,6 +383,11 @@ export default function CommunityBoard() {
                   )}
                   {p.title && (
                     <h3 className="font-bold text-gray-900 text-[15px] mb-1 break-words">
+                      {p.kind === "inquiry" && p.seq != null && (
+                        <span className="mr-1.5 font-mono text-[13px] font-medium text-gray-400">
+                          No.{p.seq}
+                        </span>
+                      )}
                       {p.title}
                     </h3>
                   )}

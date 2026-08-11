@@ -110,8 +110,17 @@ export async function listPosts(
        LIMIT ${limit} OFFSET ${offset}
     `;
 
-    const posts = rows.map((r) => {
+    // 게시판 글번호. 최신 글이 가장 큰 번호를 갖는다 — 번호만 보고도
+    // 문의가 얼마나 쌓였는지 짐작할 수 있게 하려는 것이다.
+    const totalRows = await sql`
+      SELECT count(*)::int AS n FROM community_posts
+       WHERE kind = 'inquiry' AND deleted_at IS NULL
+    `;
+    const total = Number(totalRows[0]?.n ?? 0);
+
+    const posts = rows.map((r, i) => {
       const post = mapPost(r, viewerId);
+      post.seq = total - offset - i;
       post.replyCount = Number(r.reply_count ?? 0);
       if (!post.isMine) {
         // 남의 글은 본문을 아예 내려보내지 않는다(화면에서 가리는 것으로는 부족하다).
@@ -145,21 +154,6 @@ export async function listPosts(
      LIMIT ${limit} OFFSET ${offset}
   `;
   return attachReplies(rows.map((r) => mapPost(r, viewerId)));
-}
-
-/**
- * 게시된 후기 개수.
- * 비로그인 화면의 "후기 N개" 안내에 쓴다 — 내용은 안 내주지만 몇 개가 있는지는 알려준다.
- * (개수까지 감추면 로그인할 이유를 알 수 없다)
- */
-export async function countPublishedReviews(): Promise<number> {
-  await ensureSchema();
-  const rows = await sql`
-    SELECT count(*)::int AS n
-      FROM community_posts
-     WHERE kind = 'review' AND status = 'published' AND deleted_at IS NULL
-  `;
-  return Number(rows[0]?.n ?? 0);
 }
 
 /** 상세 조회. 볼 권한이 없으면 null. */

@@ -31,6 +31,8 @@ export interface Post {
   locked?: boolean;
   /** 잠긴 글에도 "답변완료" 여부는 보여준다 */
   replyCount?: number;
+  /** 상담문의 게시판 글번호 (최신 글이 가장 큰 번호) */
+  seq?: number;
 }
 
 export interface SessionInfo {
