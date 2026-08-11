@@ -48,6 +48,18 @@ function mapPost(r: Row, viewerId: number | null): Post {
   };
 }
 
+/**
+ * 남의 상담문의에 표시할 작성자 이름을 가린다.
+ * 제목은 공개하되 "누가 무엇을 물었는지"까지는 이어붙일 수 없게 하기 위한 것이다.
+ *   봄이맘 → 봄이●  /  키크는중77 → 키크●●●●●
+ */
+function maskNickname(nick: string): string {
+  const n = (nick || "익명").trim();
+  if (n.length <= 1) return n;
+  const keep = n.length <= 3 ? 1 : 2;
+  return n.slice(0, keep) + "●".repeat(Math.min(n.length - keep, 5));
+}
+
 /** 글 목록에 답변을 한 번의 쿼리로 붙인다 (글마다 조회하면 N+1이 된다). */
 async function attachReplies(posts: Post[]): Promise<Post[]> {
   if (!posts.length) return posts;
@@ -82,12 +94,11 @@ export async function listPosts(
   await ensureSchema();
 
   if (kind === "inquiry") {
-    if (viewerId == null) return [];
-
     // 상담문의는 비밀글 게시판처럼 동작한다 —
-    // **제목·작성자·날짜·답변 여부는 회원 모두에게** 보이고,
+    // **제목·날짜·답변 여부는 로그인하지 않은 방문자에게도** 보이고,
     // **본문과 답변 내용은 작성자 본인(과 관리자)에게만** 보인다.
-    // 다른 환자도 "나만 이런 고민이 아니구나"를 보게 하되 사생활은 지키기 위한 절충이다.
+    // "나만 이런 고민이 아니구나"를 보여 주는 것이 목적이므로 목록 자체는 열되,
+    // 남의 글은 작성자 닉네임까지 가려서 누가 무엇을 물었는지 이어붙일 수 없게 한다.
     const rows = await sql`
       SELECT p.*, u.nickname,
              (SELECT count(*) FROM community_replies r WHERE r.post_id = p.id) AS reply_count
@@ -106,6 +117,7 @@ export async function listPosts(
         // 남의 글은 본문을 아예 내려보내지 않는다(화면에서 가리는 것으로는 부족하다).
         post.content = "";
         post.locked = true;
+        post.nickname = maskNickname(post.nickname);
       }
       return post;
     });

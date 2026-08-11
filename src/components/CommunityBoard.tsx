@@ -22,7 +22,7 @@ const TABS: { kind: PostKind; label: string; desc: string }[] = [
   {
     kind: "inquiry",
     label: "상담문의",
-    desc: "증상·치료·예약 관련 문의를 남겨주세요. 작성자 본인과 병원만 볼 수 있습니다.",
+    desc: "증상·치료·예약 관련 문의를 남겨주세요. 제목은 다른 분들께도 보이고, 내용과 답변은 작성자 본인과 병원만 볼 수 있습니다.",
   },
 ];
 
@@ -360,7 +360,7 @@ export default function CommunityBoard() {
 
               {p.locked ? (
                 <p className="flex items-center gap-1.5 text-gray-400 text-sm">
-                  <Lock size={13} /> 작성자 본인만 볼 수 있는 글입니다.
+                  <Lock size={13} /> 내용은 작성자 본인과 병원만 볼 수 있습니다.
                 </p>
               ) : (
                 <p className="text-gray-700 text-[15px] leading-relaxed whitespace-pre-line break-words">
@@ -491,8 +491,9 @@ export default function CommunityBoard() {
                   AD_NOTICE
                 ) : (
                   <>
-                    상담문의는 작성자 본인과 병원만 볼 수 있습니다. 다만 인터넷 상담은 진단·처방을
-                    대신할 수 없으니, 주민등록번호 등 민감한 정보는 남기지 말아 주세요.
+                    <b>제목은 게시판에 공개되고</b>, 내용과 답변은 작성자 본인과 병원만 볼 수 있습니다.
+                    제목에는 이름·연락처처럼 본인을 알 수 있는 정보를 넣지 말아 주세요. 인터넷 상담은
+                    진단·처방을 대신할 수 없으며, 주민등록번호 등 민감한 정보는 남기지 말아 주세요.
                   </>
                 )}
               </div>

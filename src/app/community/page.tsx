@@ -7,7 +7,7 @@ import CommunityBoard from "@/components/CommunityBoard";
 export const metadata: Metadata = {
   title: "커뮤니티 · 장위365경희한의원",
   description:
-    "장위365경희한의원 커뮤니티입니다. 치료 후기를 남기시거나, 증상·치료·예약에 대한 1:1 비공개 상담문의를 남길 수 있습니다. 카카오·네이버 간편 로그인.",
+    "장위365경희한의원 커뮤니티입니다. 증상·치료·예약에 대한 상담문의를 남기시면 병원이 답변드립니다. 문의 내용과 답변은 작성자 본인과 병원만 볼 수 있습니다. 카카오·네이버 간편 로그인.",
 };
 
 export default function CommunityPage() {

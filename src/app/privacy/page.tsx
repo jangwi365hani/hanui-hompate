@@ -55,6 +55,12 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
                 <td className="border border-gray-200 px-4 py-2.5">게시글 작성</td>
                 <td className="border border-gray-200 px-4 py-2.5">
                   이용자가 직접 작성한 후기·상담문의의 제목과 내용, 별점, 작성 일시
+                  <br />
+                  <span className="text-gray-500">
+                    (상담문의는 <strong>제목·작성 일시·답변 여부만 게시판에 공개</strong>되며, 이때 별명은
+                    일부를 가려 표시합니다. 문의 내용과 답변은 작성자 본인과 병원만 볼 수 있습니다.
+                    후기는 승인 후 로그인한 회원에게만 보입니다.)
+                  </span>
                 </td>
                 <td className="border border-gray-200 px-4 py-2.5">이용자가 글을 등록한 때</td>
               </tr>
